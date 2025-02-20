@@ -1,0 +1,16 @@
+.features {
+  text-align: center;
+
+}
+
+.features-content h2 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.features-content p {
+  font-family: 'Roboto', sans-serif;
+  font-size: 1.2rem;
+  margin-bottom: 2rem;
+}

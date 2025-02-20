@@ -1,0 +1,107 @@
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 40px;
+  background: #0f172a;
+  color: white;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px; /* Space between logo and text */
+  font-size: 28px; /* Increased font size */
+  font-weight: bold;
+  font-family: 'Bebas Neue', sans-serif; /* Optional: Use a modern font */
+}
+
+.logo-icon {
+  border-radius: 10px;
+  width: 40px; /* Adjust size as needed */
+  height: auto; /* Maintains aspect ratio */
+}
+
+.nav a {
+  position: relative;
+  text-decoration: none;
+  color: white; /* Default text color */
+  font-family: 'Roboto', sans-serif; /* Modern font */
+  margin: 0 15px; /* Space between links */
+  padding: 10px 15px;
+  transition: color 0.3s ease;
+}
+
+.nav a:hover {
+  color: #EDC9AF; /* Desert Sand color on hover */
+}
+
+.nav a::after {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin: auto;
+  width: 0%;
+  content: '';
+  background: #EDC9AF; /* Desert Sand underline */
+  height: 2px;
+  transition: width 0.3s ease;
+}
+
+.nav a:hover::after {
+  width: 100%;
+}
+
+
+
+.auth-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.sign-in,
+.sign-up {
+  background: none;
+  border: 1px solid white;
+  padding: 8px 15px;
+  color: white;
+  cursor: pointer;
+  border-radius: 5px;
+  font-family: 'Roboto', sans-serif;
+  transition: all 0.3s ease; /* Smooth transition */
+}
+
+.sign-up {
+  background: white;
+  color: black;
+}
+
+/* Swap styles on hover */
+.sign-in:hover {
+  background: white;
+  color: black;
+}
+
+.sign-up:hover {
+  background: none;
+  color: white;
+}
+
+
+.nav a {
+  text-decoration: none;
+  color: #ffffff; /* Default text color */
+  padding: 10px 15px;
+  transition: color 0.3s ease, transform 0.2s ease;
+}
+
+.fit {
+  color: white; /* Yellow */
+  font-weight: bold;
+}
+
+.forge {
+  color: #f87060; /* Orange-Red */
+  font-weight: bold;
+}
