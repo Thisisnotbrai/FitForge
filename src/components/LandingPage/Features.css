@@ -1,16 +1,52 @@
-.features {
-  text-align: center;
-
+.about-section {
+  padding: 4rem 2rem;
+  background-color: #ffffff;
 }
 
-.features-content h2 {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 3rem;
-  margin-bottom: 1rem;
+.about-content {
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
-.features-content p {
-  font-family: 'Roboto', sans-serif;
-  font-size: 1.2rem;
-  margin-bottom: 2rem;
+.text-container {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  margin-bottom: 3rem;
+}
+
+.about-text {
+  flex: 1;
+  min-width: 300px;
+  margin-right: 2rem;
+}
+
+.about-text h2 {
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 2rem;
+  color: #0f172a;
+}
+
+.about-text p {
+  font-family: "Roboto", sans-serif;
+  font-size: 1.1rem;
+  color: #64748b;
+}
+
+.image-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+}
+
+.about-image {
+  width: 100%;
+  height: auto;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.about-image:hover {
+  transform: scale(1.05);
 }

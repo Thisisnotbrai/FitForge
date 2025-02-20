@@ -2,9 +2,9 @@ import React from 'react';
 import Header from './components/LandingPage/Header';
 import Hero from './components/LandingPage/Hero';
 import About from './components/LandingPage/About';
-import Features from './components/LandingPage/Features';
 import Services from './components/LandingPage/Services';
 import FAQ from './components/LandingPage/FAQ';
+import Features from './components/LandingPage/Features';
 import Footer from './components/LandingPage/Footer';
 import BackToTopButton from './components/LandingPage/BackToTopButton';
 
@@ -18,9 +18,9 @@ function App() {
       <Header />
       <Hero />
       <About />
-      <Features />
       <Services />
       <FAQ />  
+      <Features />
       <Footer />
       <BackToTopButton />
     </div>

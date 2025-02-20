@@ -24,6 +24,8 @@
     margin-bottom: 2rem;
 }
 
+
+
 .features-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Ensures better card width */

@@ -7,11 +7,10 @@ const Hero = () => {
     <section className="hero">
       <div className="trust-badge">⭐ Trusted by Over 1 Million Users Worldwide</div>
       <h1 className="hero-title">
-        Revolutionize Your <span className="gradient-text">Payments Experience</span>
+        Revolutionize Your <span className="gradient-text">Fitness Experience</span>
       </h1>
       <p className="hero-description">
-        Unlock seamless, secure, and instant financial transactions. Manage, send, and receive
-        money effortlessly, with the ability to scale and integrate multiple financial services.
+      Empower your fitness journey with seamless, secure, and instant financial transactions. Easily manage memberships, book training sessions, and purchase supplements—all in one place. Stay focused on your goals while we handle the payments.
       </p>
       <div className="hero-buttons">
         <button className="start-now">Start Now</button>
@@ -38,7 +37,7 @@ const Hero = () => {
           <Repeat size={32} className="feature-icon1" />
           <h3 className="feature-title1">Multi-Currency Support</h3>
           <p className="feature-description1">
-            Effortlessly transact in multiple currencies. ZenPay simplifies international payments.
+          Log your workouts, track progress, and receive real-time AI-driven insights effortlessly. FitForge integrates everything you need for a smooth fitness experience.
           </p>
         </div>
       </div>

@@ -1,47 +1,48 @@
 import React from "react";
+import { Globe, Key, Moon, PenSquare, Lock, Tag, ThumbsUp, Bell } from "lucide-react";
 import "./Services.css";
 
 const Services = () => {
   const features = [
     {
-      icon: "🌐", // Replace with an actual icon or image
-      title: "Custom Domains",
-      description: "Make your customers feel like they never left your website.",
+      icon: <Globe size={24} className="feature-icon1" />,
+      title: "Personalized Dashboard",
+      description: "Access your workouts, progress, and nutrition plans all in one place.",
     },
     {
-      icon: "🔑", // Replace with an actual icon or image
-      title: "Single Sign-On",
-      description: "Let your users post feedback without having to authenticate.",
+      icon: <Key size={24}  className="feature-icon1"/>,
+      title: "Secure Login",
+      description: "Seamlessly log in and manage your fitness profile with secure authentication.",
     },
     {
-      icon: "🌓", // Replace with an actual icon or image
+      icon: <Moon size={24} className="feature-icon1" />,
       title: "Dark & Light Mode",
-      description: "Choose the theme that suits your eyes the best.",
+      description: "Choose a theme that enhances your focus and training experience.",
     },
     {
-      icon: "📝", // Replace with an actual icon or image
-      title: "No Sign-Up Posting & Voting",
-      description: "Let people join the conversation without having to sign in.",
+      icon: <PenSquare size={24}  className="feature-icon1"/>,
+      title: "Workout Planner",
+      description: "Easily create and track your workouts for optimized performance.",
     },
     {
-      icon: "🔒", // Replace with an actual icon or image
-      title: "Private Categories",
-      description: "Keep feedback board public, but manage some tasks internally.",
+      icon: <Lock size={24}  className="feature-icon1"/>,
+      title: "Exclusive Training Programs",
+      description: "Unlock premium workout plans tailored to your fitness goals.",
     },
     {
-      icon: "🏷️", // Replace with an actual icon or image
-      title: "Custom Tags",
-      description: "Categorize posts further with tags to give more context.",
+      icon: <Tag size={24}  className="feature-icon1"/>,
+      title: "Custom Workout Tags",
+      description: "Organize exercises with tags to better track your progress.",
     },
     {
-      icon: "👍👎", // Replace with an actual icon or image
-      title: "Upvoting & Downvoting",
-      description: "Prioritize product development, see what your users want.",
+      icon: <ThumbsUp size={24}  className="feature-icon1"/>,
+      title: "Community Engagement",
+      description: "Share progress, upvote favorite routines, and connect with trainers.",
     },
     {
-      icon: "🔔", // Replace with an actual icon or image
-      title: "Featurebase Notifications",
-      description: "Featurebase notifies your users when there are changes.",
+      icon: <Bell size={24} className="feature-icon1" />,
+      title: "Real-Time Notifications",
+      description: "Stay updated with workout reminders, goal achievements, and trainer messages.",
     },
   ];
 

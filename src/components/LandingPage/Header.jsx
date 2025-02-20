@@ -16,8 +16,8 @@ const Header = () => {
       <nav className="nav">
         <a href="#">Products</a>
         <a href="#about">Get Started</a>
-        <a href="#services">Services</a>
         <a href="#FAQ">FAQs</a>
+        <a href="#features">Our Team</a>
         <a href="#contact-us">Contact Us</a>
       </nav>
       <div className="auth-buttons">
