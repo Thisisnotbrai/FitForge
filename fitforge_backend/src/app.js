@@ -3,6 +3,7 @@ const app = express();
 const parser = require('body-parser');
 const morgan = require('morgan');
 const database = require('./models/database');
+const cors = require('cors');
 
 app.use(morgan('dev'));
 app.use(parser.urlencoded({extended: false}));
