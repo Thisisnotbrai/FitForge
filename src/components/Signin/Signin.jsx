@@ -15,7 +15,7 @@ const Signin = () => {
     e.preventDefault();
 
     try {
-      const response = await axios.post("http://localhost:3000/user/login", {
+      const response = await axios.post("http://localhost:3000/users/login", {
         user_email,
         user_password,
       });
