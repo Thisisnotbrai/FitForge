@@ -8,6 +8,7 @@ const Signup = () => {
   const [user_name, setName] = useState("");
   const [user_email, setEmail] = useState("");
   const [user_password, setPassword] = useState("");
+  const [user_role, setRole] = useState("trainee"); // Default role is trainee
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [apiError, setApiError] = useState("");
@@ -46,6 +47,7 @@ const Signup = () => {
         user_name,
         user_email,
         user_password,
+        user_role, // Include user role in the request
       });
       console.log("Registration successful:", result.data);
       alert("Registration successful!");
@@ -53,6 +55,7 @@ const Signup = () => {
       setName("");
       setEmail("");
       setPassword("");
+      setRole("trainee"); // Reset role to default
     } catch (err) {
       console.error("Registration failed:", err);
       setApiError(
@@ -124,6 +127,20 @@ const Signup = () => {
               {errors.password && (
                 <span style={{ color: "red" }}>{errors.password}</span>
               )}
+            </div>
+            <div className="signup-input-group">
+              <label htmlFor="role" className="signup-input-label">
+                Role:
+              </label>
+              <select
+                id="role"
+                className="signup-input-field"
+                value={user_role}
+                onChange={(e) => setRole(e.target.value)}
+              >
+                <option value="trainee">Trainee</option>
+                <option value="trainer">Trainer</option>
+              </select>
             </div>
             {apiError && <p style={{ color: "red" }}>{apiError}</p>}
             <button
