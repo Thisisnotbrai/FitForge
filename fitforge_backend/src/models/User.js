@@ -23,6 +23,11 @@ module.exports = (sequelize, DataTypes) => {
                     msg: 'Password must be at least 8 characters long and contain at least one capital letter and a number.'
                 }
             }
+        },
+        user_role: {
+            type: DataTypes.ENUM('trainee', 'trainer', 'admin'),
+            allowNull: false,
+            defaultValue: 'trainee'
         }
     });
 
