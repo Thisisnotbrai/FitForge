@@ -1,0 +1,293 @@
+/* Timbur.css - Chatbot styling */
+
+.timbur-container {
+  width: 350px;
+  height: 500px;
+  border-radius: 15px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  background-color: #fff;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  margin: 20px;
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;
+  font-family: Arial, sans-serif;
+}
+
+.timbur-header {
+  background-color: #e74c3c;
+  color: white;
+  padding: 15px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  position: relative;
+}
+
+.avatar {
+  width: 36px;
+  height: 36px;
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.avatar-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.avatar-icon {
+  font-size: 20px;
+}
+
+.header-text {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.timbur-header h2 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.status {
+  margin: 0;
+  font-size: 14px;
+  opacity: 0.8;
+}
+
+.timbur-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  background-color: #f9f9f9;
+}
+
+.message-wrapper {
+  display: flex;
+  max-width: 80%;
+  margin-bottom: 6px;
+  align-items: flex-start;
+}
+
+.message-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.user-wrapper {
+  align-self: flex-end;
+  flex-direction: row-reverse;
+}
+
+.bot-wrapper {
+  align-self: flex-start;
+}
+
+.message-icon {
+  width: 24px;
+  height: 24px;
+  margin-right: 8px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.2);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.message-avatar {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.message {
+  padding: 10px 14px;
+  border-radius: 18px;
+  word-wrap: break-word;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.message p {
+  margin: 0;
+  line-height: 1.4;
+  font-size: 14px;
+}
+
+.message.user {
+  background-color: #e74c3c;
+  color: white;
+  border-bottom-right-radius: 4px;
+}
+
+.message.bot {
+  background-color: #8b8b8b;
+  color: white;
+  border-bottom-left-radius: 4px;
+}
+
+.message-time {
+  font-size: 10px;
+  color: #999;
+  margin-top: 3px;
+  align-self: flex-start;
+}
+
+.user-wrapper .message-time {
+  align-self: flex-end;
+}
+
+.message.typing {
+  display: flex;
+  padding: 10px 12px;
+  background-color: #8b8b8b;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  background-color: #888;
+  border-radius: 50%;
+  margin: 0 2px;
+  animation: pulse 1.5s infinite ease-in-out;
+}
+
+.dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+}
+
+.timbur-input-area {
+  display: flex;
+  padding: 10px 15px;
+  background-color: white;
+  border-top: 1px solid #eee;
+}
+
+.timbur-input {
+  flex: 1;
+  padding: 12px 15px;
+  border: 1px solid #eee;
+  border-radius: 30px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+  background-color: #f0f0f0;
+}
+
+.timbur-input:focus {
+  border-color: #6c5ce7;
+  background-color: #fff;
+}
+
+.timbur-send-button {
+  width: 40px;
+  height: 40px;
+  background-color: white;
+  color: white;
+  border: 2px solid #f44336;
+  border-radius: 50%;
+  margin-left: 10px;
+  cursor: pointer;
+  transition: transform 0.2s, background-color 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.timbur-send-button:hover {
+  background-color: #f9f9f9;
+  transform: scale(1.05);
+}
+
+.timbur-send-button svg {
+  width: 24px;
+  height: 24px;
+}
+
+/* New close button styles */
+.timbur-close-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: #f44336;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  z-index: 1002;
+  transition: transform 0.2s, background-color 0.2s;
+}
+
+.timbur-close-button:hover {
+  background-color: #e53935;
+  transform: scale(1.05);
+}
+
+/* Media Queries for responsive design */
+@media (max-width: 768px) {
+  .timbur-container {
+    width: 90%;
+    max-width: 350px;
+  }
+}
+
+@media (max-width: 480px) {
+  .timbur-container {
+    width: 100%;
+    height: 100%;
+    bottom: 0;
+    right: 0;
+    margin: 0;
+    border-radius: 0;
+  }
+}
+
+.bot-wrapper .message::before {
+  content: "";
+  background-image: url("https://img.pokemondb.net/sprites/black-white/anim/normal/timburr.gif");
+  background-size: contain;
+  background-repeat: no-repeat;
+  width: 20px;
+  height: 20px;
+  position: absolute;
+  left: -25px;
+  top: 50%;
+  transform: translateY(-50%);
+} 

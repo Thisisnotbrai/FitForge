@@ -3,6 +3,7 @@ import { Outlet, useNavigate } from "react-router-dom";
 import "./DashboardLayout.css";
 import logo from "../../assets/FitForge Logo.jpg"; // Importing the logo
 import Dashboard from "./Dashboard"; // Import the Dashboard component
+import ChatbotWidget from "../Chatbot/ChatbotWidget"; // Import the ChatbotWidget
 
 const DashboardLayout = () => {
   const navigate = useNavigate();
@@ -37,6 +38,7 @@ const DashboardLayout = () => {
       </header>
       
       <Dashboard /> {/* Render the Dashboard component here */}
+      <ChatbotWidget /> {/* Add the ChatbotWidget component */}
     </div>
   );
 };
