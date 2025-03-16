@@ -7,8 +7,8 @@ import FAQ from "./components/LandingPage/FAQ";
 import Features from "./components/LandingPage/Features";
 import Footer from "./components/LandingPage/Footer";
 import BackToTopButton from "./components/LandingPage/BackToTopButton";
-import Dashboard from "./components/Views/Dashboard";
-import TrainerDashboard from "./components/Views/TrainerDashboard"; // Import the TrainerDashboard
+import Dashboard from "./components/Views/Trainee/Dashboard";
+import TrainerDashboard from "./components/Views/Trainer/TrainerDashboard"; // Import the TrainerDashboard
 import ProtectedRoute from "./components/Views/ProtectedRoute";
 import DashboardLayout from "./components/Views/DashboardLayout"; // Import the layout
 import "./App.css";

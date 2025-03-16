@@ -2,7 +2,7 @@
 import { Outlet, useNavigate } from "react-router-dom";
 import "./DashboardLayout.css";
 import logo from "../../assets/FitForge Logo.jpg"; // Importing the logo
-import Dashboard from "./Dashboard"; // Import the Dashboard component
+import Dashboard from "./Trainee/Dashboard"; // Import the Dashboard component
 import ChatbotWidget from "../Chatbot/ChatbotWidget"; // Import the ChatbotWidget
 
 const DashboardLayout = () => {
@@ -26,7 +26,7 @@ const DashboardLayout = () => {
             <span className="forge">Forge</span>
           </span>
         </div>
-        
+
         <nav className="nav">
           <a href="#">Products</a>
           <a href="#about">Get Started</a>
@@ -36,7 +36,6 @@ const DashboardLayout = () => {
           <button onClick={handleLogout}>Logout</button>
         </nav>
       </header>
-      
       <Dashboard /> {/* Render the Dashboard component here */}
       <ChatbotWidget /> {/* Add the ChatbotWidget component */}
     </div>
