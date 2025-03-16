@@ -38,5 +38,33 @@
 .main-content {
   flex: 1;
   padding: 20px;
-  background-color: #ecf0f1;
+  background-color: #0f172a;
+}
+
+.header {
+  background-color: #1a202c; /* Dark background color */
+  padding: 10px 40px; /* Add more padding for white space */
+  margin: 10px; /* Add margin for white space around the navbar */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-radius: 8px; /* Optional: add rounded corners */
+}
+
+.nav {
+  display: flex;
+  gap: 20px;
+}
+
+.nav a, .nav button {
+  color: white;
+  text-decoration: none;
+  font-size: 16px;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.nav button:hover, .nav a:hover {
+  text-decoration: underline;
 }

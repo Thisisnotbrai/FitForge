@@ -1,6 +1,8 @@
 // components/Views/DashboardLayout.jsx
 import { Outlet, useNavigate } from "react-router-dom";
 import "./DashboardLayout.css";
+import logo from "../../assets/FitForge Logo.jpg"; // Importing the logo
+import Dashboard from "./Dashboard"; // Import the Dashboard component
 
 const DashboardLayout = () => {
   const navigate = useNavigate();
@@ -14,24 +16,27 @@ const DashboardLayout = () => {
   };
 
   return (
-    <div className="dashboard-layout">
-      {/* Sidebar */}
-      <div className="sidebar">
-        <h2>Dashboard Sidebar</h2>
-        <ul>
-          <li>Home</li>
-          <li>Profile</li>
-          <li>Settings</li>
-          <li>
-            <button onClick={handleLogout}>Logout</button>
-          </li>
-        </ul>
-      </div>
-
-      {/* Main Content */}
-      <div className="main-content">
-        <Outlet /> {/* This will render the nested route (e.g., Dashboard) */}
-      </div>
+    <div>
+      <header className="header">
+        <div className="logo">
+          <img src={logo} alt="FitForge Logo" className="logo-icon" />
+          <span>
+            <span className="fit">Fit</span>
+            <span className="forge">Forge</span>
+          </span>
+        </div>
+        
+        <nav className="nav">
+          <a href="#">Products</a>
+          <a href="#about">Get Started</a>
+          <a href="#FAQ">FAQs</a>
+          <a href="#features">Our Team</a>
+          <a href="#contact-us">Contact Us</a>
+          <button onClick={handleLogout}>Logout</button>
+        </nav>
+      </header>
+      
+      <Dashboard /> {/* Render the Dashboard component here */}
     </div>
   );
 };
