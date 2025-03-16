@@ -25,8 +25,7 @@ export const processMessage = async (message) => {
       {
         method: "POST",
         headers: {
-          Authorization:
-            "Bearer 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",
+          Authorization: `Bearer ${import.meta.env.VITE_OPENROUTER_API_KEY}`,
           "HTTP-Referer": window.location.origin,
           "X-Title": "FitForge",
           "Content-Type": "application/json",
