@@ -23,16 +23,31 @@ const Signin = () => {
       console.log("Backend response:", response.data); // Debugging
 
       if (response.data.data) {
-        // Save the token to localStorage
-        localStorage.setItem("token", response.data.token);
-        console.log("Token saved:", response.data.token); // Debugging
+        // Correctly extract the token and user info
+        const token = response.data.data; // This is the actual token
+        const user = response.data.message.User; // This is the user object
+
+        // Debugging: Log the user object to verify its structure
+        console.log("User object:", user);
+
+        // Save token and user info
+        localStorage.setItem("token", token);
+        localStorage.setItem("user", JSON.stringify(user));
+
+        console.log("Token and user info saved:", token, user); // Debugging
 
         alert("Login successful!");
 
-        // Delay navigation slightly to ensure localStorage updates
-        setTimeout(() => {
-          navigate("/Dashboard"); // Ensure this matches your route definition
-        }, 500);
+        // Check user role and navigate accordingly
+        if (user?.role === "trainee") {
+          console.log("Navigating to /Dashboard");
+          navigate("/Dashboard", { replace: true }); // Ensure navigation
+        } else if (user?.role === "trainer") {
+          console.log("Navigating to /TrainerDashboard");
+          navigate("/TrainerDashboard", { replace: true });
+        } else {
+          setError("Unknown user role");
+        }
       } else {
         setError(response.data.message || "Login failed");
       }
