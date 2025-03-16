@@ -19,6 +19,9 @@ dist-ssr
 .env.test.local
 .env.production.local
 
+# Config with sensitive data
+src/config/config.js
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

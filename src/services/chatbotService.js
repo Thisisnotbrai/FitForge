@@ -5,6 +5,8 @@
  * by calling the OpenRouter API.
  */
 
+import config from "../config/config.js";
+
 // Fallback responses in case the API fails
 const fallbackResponses = [
   "I'm having trouble connecting to my knowledge base. Could you try again in a moment?",
@@ -20,32 +22,29 @@ const fallbackResponses = [
 export const processMessage = async (message) => {
   try {
     // Make API call to OpenRouter
-    const response = await fetch(
-      "https://openrouter.ai/api/v1/chat/completions",
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${import.meta.env.VITE_OPENROUTER_API_KEY}`,
-          "HTTP-Referer": window.location.origin,
-          "X-Title": "FitForge",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: "deepseek/deepseek-r1:free",
-          messages: [
-            {
-              role: "system",
-              content:
-                "You are Timbur, a helpful fitness assistant. Provide concise, accurate advice about workouts, nutrition, and fitness goals. Keep responses brief and focused on health and fitness topics.",
-            },
-            {
-              role: "user",
-              content: message,
-            },
-          ],
-        }),
-      }
-    );
+    const response = await fetch(config.openRouter.endpoint, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${config.openRouter.apiKey}`,
+        "HTTP-Referer": window.location.origin,
+        "X-Title": "FitForge",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "deepseek/deepseek-r1:free",
+        messages: [
+          {
+            role: "system",
+            content:
+              "You are Timbur, a helpful fitness assistant. Provide concise, accurate advice about workouts, nutrition, and fitness goals. Keep responses brief and focused on health and fitness topics.",
+          },
+          {
+            role: "user",
+            content: message,
+          },
+        ],
+      }),
+    });
 
     if (!response.ok) {
       const errorData = await response.json();
