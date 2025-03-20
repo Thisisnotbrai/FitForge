@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 const dbconfig = require("../config/config");
 const { Sequelize, DataTypes } = require("sequelize");
 
@@ -14,6 +15,7 @@ const sequelize = new Sequelize(
 sequelize
   .authenticate()
   .then(() => console.log("Database connected successfully!"))
+  // eslint-disable-next-line no-unused-vars
   .catch((err) => console.log(error));
 
 const db = {};
@@ -22,9 +24,10 @@ db.Sequelize = Sequelize;
 db.sequelize = sequelize;
 
 db.User = require("../models/User")(sequelize, DataTypes);
+db.Exercise = require("../models/exercise")(sequelize, DataTypes);
 
 db.sequelize
-  .sync({ alter: false })
+  .sync({ force: false })
   .then(() => console.log("Database synced successfully!"))
   .catch((error) => console.error("error during connection", error));
 
