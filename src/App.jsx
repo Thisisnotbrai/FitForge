@@ -11,6 +11,8 @@ import Dashboard from "./components/Views/Trainee/Dashboard";
 import TrainerDashboard from "./components/Views/Trainer/TrainerDashboard"; // Import the TrainerDashboard
 import ProtectedRoute from "./components/Views/ProtectedRoute";
 import DashboardLayout from "./components/Views/DashboardLayout"; // Import the layout
+import Signup from "./components/Signup/Signup"; // Import Signup component
+import VerificationTab from "./components/Signup/VerificationTab"; // Import VerificationTab component
 import "./App.css";
 
 function App() {
@@ -32,6 +34,10 @@ function App() {
           </div>
         }
       />
+
+      {/* Signup and Verification Routes */}
+      <Route path="/signup" element={<Signup />} />
+      <Route path="/verify" element={<VerificationTab />} />
 
       {/* Protected Dashboard Route */}
       <Route element={<ProtectedRoute />}>
