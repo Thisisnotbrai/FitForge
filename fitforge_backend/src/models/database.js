@@ -17,7 +17,7 @@ db.sequelize = sequelize;
 
 db.User = require('../models/User')(sequelize, DataTypes);
 
-db.sequelize.sync({ force: false })
+db.sequelize.sync({ alter: false })
 .then(() => console.log('Database synced successfully!'))
 .catch((error) => console.error('error during connection', error));
 

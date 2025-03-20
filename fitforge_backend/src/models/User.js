@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 module.exports = (sequelize, DataTypes) => {
   const User = sequelize.define("User", {
     user_name: {
@@ -25,7 +26,15 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.ENUM('trainee', 'trainer', 'admin'),
       allowNull: false,
       defaultValue: 'trainee'
-  }
+  },
+  verification_code: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+  is_verified: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+ }
   });
 
   return User;
