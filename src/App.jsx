@@ -9,6 +9,7 @@ import Footer from "./components/LandingPage/Footer";
 import BackToTopButton from "./components/LandingPage/BackToTopButton";
 import Dashboard from "./components/Views/Trainee/Dashboard";
 import TrainerDashboard from "./components/Views/Trainer/TrainerDashboard"; // Import the TrainerDashboard
+import UserProfile from "./components/Views/Trainee/UserProfile"; // Import the UserProfile component
 import ProtectedRoute from "./components/Views/ProtectedRoute";
 import DashboardLayout from "./components/Views/DashboardLayout"; // Import the layout
 import "./App.css";
@@ -37,8 +38,8 @@ function App() {
       <Route element={<ProtectedRoute />}>
         <Route element={<DashboardLayout />}>
           <Route path="/Dashboard" element={<Dashboard />} />
-          <Route path="/TrainerDashboard" element={<TrainerDashboard />} />{" "}
-          {/* Add TrainerDashboard route */}
+          <Route path="/TrainerDashboard" element={<TrainerDashboard />} />
+          <Route path="/profile" element={<UserProfile />} /> {/* Add UserProfile route */}
         </Route>
       </Route>
     </Routes>
