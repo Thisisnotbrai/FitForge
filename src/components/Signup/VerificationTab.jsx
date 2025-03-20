@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import axios from "axios";
 import "./VerificationTab.css";
 
 const VerificationTab = () => {
@@ -13,21 +14,81 @@ const VerificationTab = () => {
   ]);
   const [isVerifying, setIsVerifying] = useState(false);
   const [error, setError] = useState("");
+  const [isChecking, setIsChecking] = useState(true);
   const inputRefs = useRef([]);
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Get email from location state, fallback to empty string if not provided
-  const email = location.state?.email || "";
+  // Get email from location state, fallback to localStorage if not provided
+  const email = location.state?.email || localStorage.getItem("pendingVerificationEmail") || "";
 
   // Initialize refs array
   useEffect(() => {
     inputRefs.current = inputRefs.current.slice(0, 6);
+  }, []);
 
-    // If no email was provided, redirect back to signup
-    if (!email) {
-      navigate("/signup");
-    }
+  // Check if email is already verified and redirect if needed
+  useEffect(() => {
+    const checkVerificationStatus = async () => {
+      if (!email) {
+        navigate("/signup");
+        return;
+      }
+      
+      try {
+        // Store email in localStorage in case of page refresh
+        localStorage.setItem("pendingVerificationEmail", email);
+        
+        // Check if we have temp user data from registration
+        const storedUser = localStorage.getItem("tempUserData");
+        
+        if (storedUser) {
+          // User is coming from registration, we need to check if they're verified
+          const userData = JSON.parse(storedUser);
+          
+          try {
+            // Try to login which will tell us if verified
+            const loginResponse = await axios.post("http://localhost:3000/users/login", {
+              user_email: userData.email,
+              user_password: userData.password
+            });
+            
+            if (loginResponse.data.data) {
+              const user = loginResponse.data.message.User;
+              
+              // If user is already verified, log them in and redirect
+              if (user.is_verified) {
+                const token = loginResponse.data.data;
+                
+                localStorage.setItem("token", token);
+                localStorage.setItem("user", JSON.stringify(user));
+                localStorage.removeItem("tempUserData");
+                localStorage.removeItem("pendingVerificationEmail");
+                
+                // Redirect based on user role
+                if (user.role === "trainee") {
+                  navigate("/Dashboard", { replace: true });
+                } else if (user.role === "trainer") {
+                  navigate("/TrainerDashboard", { replace: true });
+                }
+                return;
+              }
+            }
+          } catch (err) {
+            console.error("Error checking verification status:", err);
+            // Continue showing verification page even if check fails
+          }
+        } else {
+          // User is coming from login, try to check verification status via login API
+          // We don't have the password, so we can't automatically verify
+          // But we'll keep the component mounted to allow verification
+        }
+      } finally {
+        setIsChecking(false);
+      }
+    };
+    
+    checkVerificationStatus();
   }, [email, navigate]);
 
   const handleChange = (index, value) => {
@@ -76,7 +137,7 @@ const VerificationTab = () => {
     }
   };
 
-  const handleVerify = () => {
+  const handleVerify = async () => {
     setIsVerifying(true);
     setError("");
 
@@ -87,27 +148,92 @@ const VerificationTab = () => {
       return;
     }
 
-    // Here you would typically verify the code with your backend
-    // For demo purposes, let's simulate a verification
-    setTimeout(() => {
-      setIsVerifying(false);
-      // Example verification logic (replace with actual API call)
-      if (verificationCode.join("") === "123456") {
-        // Verification successful, redirect or show success message
-        alert("Verification successful!");
-        // Redirect to appropriate dashboard based on user role
-        // You would typically get the role from your backend or session
-        navigate("/Dashboard");
-      } else {
-        setError("Invalid verification code. Please try again.");
+    try {
+      // Call the backend verification API
+      const response = await axios.post("http://localhost:3000/users/verify", {
+        email: email,
+        verification_code: verificationCode.join("")
+      });
+
+      // If verification was successful
+      if (response.status === 200) {
+        // Clear the pending verification email
+        localStorage.removeItem("pendingVerificationEmail");
+        
+        // Try to get user credentials if they exist (in case user just registered)
+        const storedUser = localStorage.getItem("tempUserData");
+        
+        if (storedUser) {
+          // User just registered, log them in automatically
+          const userData = JSON.parse(storedUser);
+          
+          try {
+            // Attempt to log in the user
+            const loginResponse = await axios.post("http://localhost:3000/users/login", {
+              user_email: userData.email,
+              user_password: userData.password
+            });
+            
+            if (loginResponse.data.data) {
+              const token = loginResponse.data.data;
+              const user = loginResponse.data.message.User;
+              
+              localStorage.setItem("token", token);
+              localStorage.setItem("user", JSON.stringify(user));
+              localStorage.removeItem("tempUserData");
+              
+              // Redirect based on user role
+              if (user.role === "trainee") {
+                navigate("/Dashboard", { replace: true });
+              } else if (user.role === "trainer") {
+                navigate("/TrainerDashboard", { replace: true });
+              }
+            }
+          } catch (loginErr) {
+            console.error("Auto-login failed after verification:", loginErr);
+            navigate("/login", { 
+              state: { message: "Email verified successfully! Please log in." } 
+            });
+          }
+        } else {
+          // User came from login page, redirect back to login
+          navigate("/login", { 
+            state: { message: "Email verified successfully! Please log in again." } 
+          });
+        }
       }
-    }, 1500);
+    } catch (err) {
+      console.error("Verification failed:", err);
+      setError(err.response?.data?.message || "Verification failed. Please try again.");
+    } finally {
+      setIsVerifying(false);
+    }
   };
 
-  const handleResendCode = () => {
-    // Simulate resending code
-    alert(`A new verification code has been sent to ${email}`);
+  const handleResendCode = async () => {
+    try {
+      // Here you would typically call your backend to resend the code
+      // Since we don't have that endpoint, we'll just show a message
+      alert(`A new verification code would be sent to ${email}`);
+      
+      // In a real implementation, you would have code like:
+      // await axios.post("http://localhost:3000/users/resend-verification", { email });
+    } catch (err) {
+      console.error("Failed to resend code:", err);
+      setError("Failed to resend verification code. Please try again.");
+    }
   };
+
+  if (isChecking) {
+    return (
+      <div className="verification-container">
+        <div className="verification-card">
+          <h1>Checking verification status...</h1>
+          <p>Please wait while we check your account status.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="verification-container">

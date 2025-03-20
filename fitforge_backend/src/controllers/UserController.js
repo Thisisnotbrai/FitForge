@@ -117,3 +117,26 @@ exports.registerUser = async (req, res) => {
     return send.sendErrorMessage(res, 500, error);
   }
 };
+
+exports.verifyEmail = async (req, res) => {
+  try {
+    const { email, verification_code } = req.body;
+    const existingUser = await User.findOne({ where: { user_email: email } });
+    if (!existingUser) {
+      return send.sendResponseMessage(res, 404, null, "User not found");
+    }
+    if (existingUser.is_verified) {
+      return send.sendResponseMessage(res, 400, null, "Email already verified");
+    }
+    if (existingUser.verification_code != verification_code) {
+      return send.sendResponseMessage(res, 400, null, "Invalid verification code");
+    }
+    existingUser.is_verified = true;
+    await existingUser.save();
+    return send.sendResponseMessage(res, 200, null, "Email verified successfully");
+  } catch (error) {
+    return send.sendErrorMessage(res, 500, error);
+  }
+
+
+}

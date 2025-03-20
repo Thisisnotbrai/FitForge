@@ -53,8 +53,13 @@ const Signup = () => {
       });
       console.log("Registration successful:", result.data);
 
-      // Instead of showing alert, navigate to verification page
-      // We can pass the email as state to use it in the verification page
+      // Store user credentials temporarily for auto-login after verification
+      localStorage.setItem("tempUserData", JSON.stringify({
+        email: user_email,
+        password: user_password
+      }));
+
+      // Navigate to verification page
       navigate("/verify", { state: { email: user_email } });
     } catch (err) {
       console.error("Registration failed:", err);
