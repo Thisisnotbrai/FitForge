@@ -1,8 +1,8 @@
 /* Timbur.css - Chatbot styling */
 
 .timbur-container {
-  width: 350px;
-  height: 500px;
+  width: 450px;
+  height: 600px;
   border-radius: 15px;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
   background-color: #fff;

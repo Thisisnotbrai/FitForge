@@ -1,400 +1,301 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faUser, faEdit, faSave, faTimes, faUpload, faLock } from "@fortawesome/free-solid-svg-icons";
+import {
+  faCamera,
+  faCheckCircle,
+  faEdit,
+  faInfoCircle,
+  faUser,
+} from "@fortawesome/free-solid-svg-icons";
 import "./UserProfile.css";
+import { useNavigate } from "react-router-dom";
 
 const UserProfile = () => {
-  // Default user data as fallback
-  const defaultUserData = {
-    fullName: "",
-    email: "",
-    profilePicture: null,
-    bio: "",
-    location: "",
-    socialMedia: {
-      instagram: "",
-      twitter: "",
-      facebook: "",
-    },
-  };
-
-  // Get user data from localStorage
-  const getUserFromStorage = () => {
-    try {
-      // Get basic user data
-      const userString = localStorage.getItem("user");
-      if (!userString) return null;
-      
-      // Get extended profile data if it exists
-      const profileString = localStorage.getItem("userProfile");
-      const profileData = profileString ? JSON.parse(profileString) : null;
-      
-      const user = JSON.parse(userString);
-      return {
-        fullName: user.name || defaultUserData.fullName,
-        email: user.email || defaultUserData.email,
-        role: user.role || "trainee",
-        profilePicture: profileData?.profilePicture || defaultUserData.profilePicture,
-        bio: profileData?.bio || defaultUserData.bio,
-        location: profileData?.location || defaultUserData.location,
-        socialMedia: profileData?.socialMedia || defaultUserData.socialMedia,
-      };
-    } catch (error) {
-      console.error("Error parsing user data from localStorage:", error);
-      return null;
-    }
-  };
-
-  const [userData, setUserData] = useState(defaultUserData);
+  const navigate = useNavigate();
+  const [profileImage, setProfileImage] = useState(null);
+  const [profileImagePreview, setProfileImagePreview] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
-  const [editData, setEditData] = useState(userData);
-  const [previewImage, setPreviewImage] = useState(null);
-  const [errors, setErrors] = useState({});
-  const [showSuccess, setShowSuccess] = useState(false);
+  const [editableProfile, setEditableProfile] = useState({});
+  const [profile, setProfile] = useState({});
 
-  // Load user data from localStorage on component mount
+  // Load user profile data from localStorage when component mounts
   useEffect(() => {
-    const storedUser = getUserFromStorage();
-    if (storedUser) {
-      setUserData(storedUser);
-      setEditData(storedUser);
-    }
+    loadUserProfileData();
   }, []);
 
-  const handleEditToggle = () => {
-    if (isEditing) {
-      // Cancel editing
-      setEditData(userData);
-      setPreviewImage(null);
-      setErrors({});
-    } else {
-      // Start editing
-      setEditData({ ...userData });
+  // Function to load user profile data from localStorage
+  const loadUserProfileData = () => {
+    try {
+      // Get user object from localStorage
+      const userData = JSON.parse(localStorage.getItem("user") || "{}");
+      
+      // Get userProfile object from localStorage (may contain additional data)
+      const userProfileData = JSON.parse(localStorage.getItem("userProfile") || "{}");
+      
+      // Get persisted profile data that may have been saved separately
+      const persistedProfileData = JSON.parse(localStorage.getItem("persistedProfileData") || "{}");
+      
+      // Combine all data sources, with persisted profile data taking precedence
+      const combinedProfile = {
+        ...userData,
+        ...userProfileData,
+        ...persistedProfileData
+      };
+      
+      // Load previously saved profile image if it exists
+      if (persistedProfileData.profileImageData) {
+        setProfileImagePreview(persistedProfileData.profileImageData);
+      }
+      
+      console.log("Loaded user profile data:", combinedProfile);
+      
+      // Set the profile state
+      setProfile(combinedProfile);
+      setEditableProfile(combinedProfile);
+    } catch (error) {
+      console.error("Error loading user profile data:", error);
+      console.error("Failed to load profile data");
     }
-    setIsEditing(!isEditing);
-    setShowSuccess(false);
+  };
+
+  // Function to save all profile changes to localStorage
+  const saveProfileChanges = () => {
+    try {
+      // Create a profile data object with all the fields to persist
+      const persistedData = {
+        ...editableProfile,
+        profileImageData: profileImagePreview,
+        lastUpdated: new Date().toISOString()
+      };
+      
+      // Save this as a separate object in localStorage
+      localStorage.setItem("persistedProfileData", JSON.stringify(persistedData));
+      
+      // Update the userProfile object as well to ensure data is in both places
+      const userProfile = JSON.parse(localStorage.getItem("userProfile") || "{}");
+      const updatedUserProfile = { ...userProfile, ...editableProfile };
+      localStorage.setItem("userProfile", JSON.stringify(updatedUserProfile));
+      
+      console.log("Profile data saved successfully:", persistedData);
+      
+      // Update the current profile state
+      setProfile(editableProfile);
+      setIsEditing(false);
+      
+      console.log("Profile updated successfully");
+    } catch (error) {
+      console.error("Error saving profile data:", error);
+      console.error("Failed to save profile data");
+    }
+  };
+
+  const handleProfileImageChange = (e) => {
+    if (e.target.files && e.target.files[0]) {
+      const selectedFile = e.target.files[0];
+      setProfileImage(selectedFile);
+      
+      // Create a FileReader to convert the image to data URL for preview and storage
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const imageDataUrl = event.target.result;
+        setProfileImagePreview(imageDataUrl);
+        
+        // Update editable profile with the image data
+        setEditableProfile(prev => ({
+          ...prev,
+          profileImageData: imageDataUrl
+        }));
+      };
+      reader.readAsDataURL(selectedFile);
+    }
   };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    
-    if (name.includes(".")) {
-      // Handle nested objects (social media)
-      const [parent, child] = name.split(".");
-      setEditData({
-        ...editData,
-        [parent]: {
-          ...editData[parent],
-          [child]: value,
-        },
-      });
-    } else {
-      setEditData({
-        ...editData,
-        [name]: value,
-      });
-    }
+    setEditableProfile((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
-  const handleImageUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPreviewImage(reader.result);
-        setEditData({
-          ...editData,
-          profilePicture: reader.result,
-        });
-      };
-      reader.readAsDataURL(file);a
-    }
+  const startEditing = () => {
+    setIsEditing(true);
   };
 
-  const validateForm = () => {
-    const newErrors = {};
-    
-    // Validate full name
-    if (!editData.fullName.trim()) {
-      newErrors.fullName = "Full name is required";
-    }
-    
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSave = () => {
-    if (validateForm()) {
-      // Preserve the original email when saving
-      const updatedUserData = {
-        ...editData,
-        email: userData.email, // Ensure email doesn't change
-      };
-      
-      setUserData(updatedUserData);
-      setIsEditing(false);
-      setShowSuccess(true);
-      
-      // Hide success message after 3 seconds
-      setTimeout(() => {
-        setShowSuccess(false);
-      }, 3000);
-      
-      // In a real app, you would send this data to your API
-      console.log("Saving user data:", updatedUserData);
-      
-      // Update the user's data in localStorage
-      try {
-        // Update name in the user object
-        const userString = localStorage.getItem("user");
-        if (userString) {
-          const user = JSON.parse(userString);
-          user.name = updatedUserData.fullName;
-          localStorage.setItem("user", JSON.stringify(user));
-        }
-        
-        // Save extended profile data
-        const profileData = {
-          profilePicture: updatedUserData.profilePicture,
-          bio: updatedUserData.bio,
-          location: updatedUserData.location,
-          socialMedia: updatedUserData.socialMedia
-        };
-        localStorage.setItem("userProfile", JSON.stringify(profileData));
-      } catch (error) {
-        console.error("Error updating user data in localStorage:", error);
-      }
-    }
+  const cancelEditing = () => {
+    // Reset editable profile to current profile
+    setEditableProfile(profile);
+    // Reset image preview to current image
+    setProfileImagePreview(profile.profileImageData);
+    setIsEditing(false);
   };
 
   return (
-    <div className="user-profile-container">
+    <div className="profile-container">
       <div className="profile-header">
-        <h1>User Profile</h1>
-        <button 
-          className={`profile-action-btn ${isEditing ? "cancel-btn" : "edit-btn"}`}
-          onClick={handleEditToggle}
-        >
-          {isEditing ? (
-            <>
-              <FontAwesomeIcon icon={faTimes} /> Cancel
-            </>
-          ) : (
-            <>
-              <FontAwesomeIcon icon={faEdit} /> Edit Profile
-            </>
-          )}
-        </button>
+        <h2>User Profile</h2>
+        {!isEditing && (
+          <button className="edit-profile-btn" onClick={startEditing}>
+            <FontAwesomeIcon icon={faEdit} /> Edit Profile
+          </button>
+        )}
       </div>
-
-      {showSuccess && (
-        <div className="success-message">
-          Profile updated successfully!
-        </div>
-      )}
 
       <div className="profile-content">
         <div className="profile-picture-section">
-          {isEditing ? (
-            <div className="profile-picture-upload">
-              <div 
-                className="profile-picture-preview" 
-                style={{ 
-                  backgroundImage: previewImage || editData.profilePicture 
-                    ? `url(${previewImage || editData.profilePicture})` 
-                    : "none" 
-                }}
-              >
-                {!previewImage && !editData.profilePicture && (
-                  <FontAwesomeIcon icon={faUser} className="default-user-icon" />
-                )}
+          <div className="profile-picture-container">
+            {profileImagePreview ? (
+              <img src={profileImagePreview} alt="Profile" className="profile-picture" />
+            ) : (
+              <div className="profile-picture-placeholder">
+                <FontAwesomeIcon icon={faUser} size="2x" />
               </div>
-              <label className="upload-button">
-                <FontAwesomeIcon icon={faUpload} /> Upload Photo
-                <input 
-                  type="file" 
-                  accept="image/*" 
-                  onChange={handleImageUpload} 
-                  style={{ display: "none" }} 
+            )}
+            {isEditing && (
+              <div className="profile-picture-overlay">
+                <label htmlFor="profile-image-upload" className="profile-image-upload-label">
+                  <FontAwesomeIcon icon={faCamera} />
+                  <span>Change Photo</span>
+                </label>
+                <input
+                  type="file"
+                  id="profile-image-upload"
+                  accept="image/*"
+                  onChange={handleProfileImageChange}
+                  style={{ display: "none" }}
                 />
-              </label>
-            </div>
-          ) : (
-            <div 
-              className="profile-picture" 
-              style={{ 
-                backgroundImage: userData.profilePicture 
-                  ? `url(${userData.profilePicture})` 
-                  : "none" 
-              }}
-            >
-              {!userData.profilePicture && (
-                <FontAwesomeIcon icon={faUser} className="default-user-icon" />
-              )}
-            </div>
-          )}
+              </div>
+            )}
+          </div>
+          <h3 className="profile-name">{profile.name || profile.email || "User"}</h3>
+          <p className="profile-role">{profile.role || "Trainee"}</p>
         </div>
 
-        <div className="profile-details">
+        <div className="profile-details-section">
+          <h3>Personal Information</h3>
+          
           {isEditing ? (
-            <div className="edit-form">
+            <div className="profile-form">
               <div className="form-group">
-                <label>Full Name*</label>
+                <label>Full Name</label>
                 <input
                   type="text"
-                  name="fullName"
-                  value={editData.fullName}
+                  name="name"
+                  value={editableProfile.name || ""}
                   onChange={handleInputChange}
-                  className={errors.fullName ? "input-error" : ""}
+                  placeholder="Enter your full name"
                 />
-                {errors.fullName && <span className="error-message">{errors.fullName}</span>}
               </div>
-
+              
               <div className="form-group">
-                <label>Email Address</label>
-                <div className="non-editable-field">
-                  <input
-                    type="email"
-                    value={userData.email}
-                    disabled
-                    className="input-disabled"
-                  />
-                  <FontAwesomeIcon icon={faLock} className="lock-icon" />
-                </div>
-                <span className="field-note">Email cannot be changed</span>
+                <label>Email</label>
+                <input
+                  type="email"
+                  name="email"
+                  value={editableProfile.email || ""}
+                  onChange={handleInputChange}
+                  placeholder="Enter your email"
+                  disabled
+                />
+                <small>Email cannot be changed</small>
               </div>
-
+              
               <div className="form-group">
-                <label>Account Type</label>
-                <div className="non-editable-field">
-                  <input
-                    type="text"
-                    value={userData.role ? userData.role.charAt(0).toUpperCase() + userData.role.slice(1) : ""}
-                    disabled
-                    className="input-disabled"
-                  />
-                  <FontAwesomeIcon icon={faLock} className="lock-icon" />
-                </div>
-                <span className="field-note">Account type cannot be changed</span>
+                <label>Phone</label>
+                <input
+                  type="tel"
+                  name="phone"
+                  value={editableProfile.phone || ""}
+                  onChange={handleInputChange}
+                  placeholder="Enter your phone number"
+                />
               </div>
-
+              
               <div className="form-group">
-                <label>Bio</label>
+                <label>Address</label>
                 <textarea
-                  name="bio"
-                  value={editData.bio}
+                  name="address"
+                  value={editableProfile.address || ""}
                   onChange={handleInputChange}
-                  rows="4"
+                  placeholder="Enter your address"
+                  rows={3}
                 />
               </div>
-
-              <div className="form-group">
-                <label>Location</label>
-                <input
-                  type="text"
-                  name="location"
-                  value={editData.location}
-                  onChange={handleInputChange}
-                />
+              
+              <div className="form-buttons">
+                <button
+                  type="button"
+                  className="cancel-btn"
+                  onClick={cancelEditing}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  className="save-btn"
+                  onClick={saveProfileChanges}
+                >
+                  Save Changes
+                </button>
               </div>
-
-              <div className="social-media-section">
-                <h3>Social Media Links</h3>
-                <div className="form-group">
-                  <label>Instagram</label>
-                  <input
-                    type="text"
-                    name="socialMedia.instagram"
-                    value={editData.socialMedia.instagram}
-                    onChange={handleInputChange}
-                    placeholder="Instagram username"
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label>Twitter</label>
-                  <input
-                    type="text"
-                    name="socialMedia.twitter"
-                    value={editData.socialMedia.twitter}
-                    onChange={handleInputChange}
-                    placeholder="Twitter username"
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label>Facebook</label>
-                  <input
-                    type="text"
-                    name="socialMedia.facebook"
-                    value={editData.socialMedia.facebook}
-                    onChange={handleInputChange}
-                    placeholder="Facebook username"
-                  />
-                </div>
-              </div>
-
-              <button 
-                className="save-btn" 
-                onClick={handleSave}
-              >
-                <FontAwesomeIcon icon={faSave} /> Save Changes
-              </button>
             </div>
           ) : (
             <div className="profile-info">
-              <div className="info-group">
-                <h2>{userData.fullName}</h2>
-                <p className="email">{userData.email}</p>
-                <p className="role">Account Type: {userData.role ? userData.role.charAt(0).toUpperCase() + userData.role.slice(1) : ""}</p>
+              <div className="info-item">
+                <span className="info-label">Full Name</span>
+                <span className="info-value">{profile.name || "Not set"}</span>
               </div>
-
-              {userData.bio && (
-                <div className="info-group">
-                  <h3>About</h3>
-                  <p>{userData.bio}</p>
-                </div>
-              )}
-
-              {userData.location && (
-                <div className="info-group">
-                  <h3>Location</h3>
-                  <p>{userData.location}</p>
-                </div>
-              )}
-
-              {(userData.socialMedia.instagram || 
-                userData.socialMedia.twitter ||
-                userData.socialMedia.facebook) && (
-                <div className="info-group">
-                  <h3>Social Media</h3>
-                  <div className="social-links">
-                    {userData.socialMedia.instagram && (
-                      <div className="social-link">
-                        <span className="social-platform">Instagram:</span>
-                        <span className="social-username">@{userData.socialMedia.instagram}</span>
-                      </div>
-                    )}
-                    
-                    {userData.socialMedia.twitter && (
-                      <div className="social-link">
-                        <span className="social-platform">Twitter:</span>
-                        <span className="social-username">@{userData.socialMedia.twitter}</span>
-                      </div>
-                    )}
-                    
-                    {userData.socialMedia.facebook && (
-                      <div className="social-link">
-                        <span className="social-platform">Facebook:</span>
-                        <span className="social-username">{userData.socialMedia.facebook}</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
+              
+              <div className="info-item">
+                <span className="info-label">Email</span>
+                <span className="info-value">{profile.email || "Not set"}</span>
+              </div>
+              
+              <div className="info-item">
+                <span className="info-label">Phone</span>
+                <span className="info-value">{profile.phone || "Not set"}</span>
+              </div>
+              
+              <div className="info-item">
+                <span className="info-label">Address</span>
+                <span className="info-value">{profile.address || "Not set"}</span>
+              </div>
             </div>
           )}
         </div>
+        
+        {/* Health Data Section */}
+        {profile.onboardingCompleted && (
+          <div className="profile-health-section">
+            <h3>Health Information</h3>
+            <div className="health-info">
+              <div className="info-item">
+                <span className="info-label">Height</span>
+                <span className="info-value">{profile.height || "Not set"} cm</span>
+              </div>
+              
+              <div className="info-item">
+                <span className="info-label">Weight</span>
+                <span className="info-value">{profile.weight || "Not set"} kg</span>
+              </div>
+              
+              <div className="info-item">
+                <span className="info-label">Target Weight</span>
+                <span className="info-value">{profile.targetWeight || "Not set"} kg</span>
+              </div>
+              
+              <div className="info-item">
+                <span className="info-label">BMI</span>
+                <span className="info-value">{profile.bmi || "Not calculated"}</span>
+              </div>
+              
+              <div className="info-item">
+                <span className="info-label">Fitness Goal</span>
+                <span className="info-value">{profile.goal || "Not set"}</span>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
