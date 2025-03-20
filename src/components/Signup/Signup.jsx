@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import register from "../../assets/Register.jpg"; // Import the image
 import logo from "../../assets/FitForge Logo.jpg"; // Import the logo
@@ -12,6 +13,7 @@ const Signup = () => {
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [apiError, setApiError] = useState("");
+  const navigate = useNavigate();
 
   const validateForm = () => {
     const newErrors = {};
@@ -50,12 +52,15 @@ const Signup = () => {
         user_role, // Include user role in the request
       });
       console.log("Registration successful:", result.data);
-      alert("Registration successful!");
-      // Reset form
-      setName("");
-      setEmail("");
-      setPassword("");
-      setRole("trainee"); // Reset role to default
+
+      // Store user credentials temporarily for auto-login after verification
+      localStorage.setItem("tempUserData", JSON.stringify({
+        email: user_email,
+        password: user_password
+      }));
+
+      // Navigate to verification page
+      navigate("/verify", { state: { email: user_email } });
     } catch (err) {
       console.error("Registration failed:", err);
       setApiError(

@@ -1,5 +1,5 @@
-import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import login from "../../assets/Loginlogo.jpg";
 import logo from "../../assets/FitForge Logo.jpg";
@@ -9,7 +9,18 @@ const Signin = () => {
   const [user_email, setEmail] = useState("");
   const [user_password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Check for any messages passed via location state (like after verification)
+  useEffect(() => {
+    if (location.state?.message) {
+      setMessage(location.state.message);
+      // Clear the state to prevent showing the message again on refresh
+      window.history.replaceState({}, document.title);
+    }
+  }, [location]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -27,16 +38,25 @@ const Signin = () => {
         const token = response.data.data; // This is the actual token
         const user = response.data.message.User; // This is the user object
 
-        // Debugging: Log the user object to verify its structure
+        // Debugging: Log the user object and verification status
         console.log("User object:", user);
+        console.log("Is verified?", user.is_verified);
 
-        // Save token and user info
+        // Save token and user info first
         localStorage.setItem("token", token);
         localStorage.setItem("user", JSON.stringify(user));
 
         console.log("Token and user info saved:", token, user); // Debugging
 
-        alert("Login successful!");
+        // Check if user is verified - only redirect if explicitly false
+        // Some backends might return undefined instead of false
+        if (user.is_verified === false) {
+          // Store email for verification page
+          localStorage.setItem("pendingVerificationEmail", user_email);
+          // Navigate to verification page
+          navigate("/verify", { state: { email: user_email } });
+          return;
+        }
 
         // Check user role and navigate accordingly
         if (user?.role === "trainee") {
@@ -73,6 +93,9 @@ const Signin = () => {
             </h2>
           </div>
           <h1 className="form-title">Sign in</h1>
+          
+          {message && <p className="success-message">{message}</p>}
+          
           <form className="login-form" onSubmit={handleSubmit}>
             <div className="input-group">
               <label htmlFor="email" className="input-label">

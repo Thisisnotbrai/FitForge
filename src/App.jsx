@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import Header from "./components/LandingPage/Header";
 import Hero from "./components/LandingPage/Hero";
 import About from "./components/LandingPage/About";
@@ -12,7 +12,32 @@ import TrainerDashboard from "./components/Views/Trainer/TrainerDashboard"; // I
 import UserProfile from "./components/Views/Trainee/UserProfile"; // Import the UserProfile component
 import ProtectedRoute from "./components/Views/ProtectedRoute";
 import DashboardLayout from "./components/Views/DashboardLayout"; // Import the layout
+import Signup from "./components/Signup/Signup"; // Import Signup component
+import VerificationTab from "./components/Signup/VerificationTab"; // Import VerificationTab component
+import Signin from "./components/Signin/Signin"; // Import Signin component
 import "./App.css";
+
+// Component to check if user is already verified and redirect accordingly
+const VerificationRoute = () => {
+  const userString = localStorage.getItem("user");
+  
+  if (userString) {
+    const user = JSON.parse(userString);
+    console.log("User verification status in VerificationRoute:", user.is_verified);
+    
+    // If user is already logged in and verified, redirect to dashboard
+    // Only check if explicitly true (not undefined, empty, etc.)
+    if (user.is_verified === true) {
+      if (user.role === "trainee") {
+        return <Navigate to="/Dashboard" replace />;
+      } else if (user.role === "trainer") {
+        return <Navigate to="/TrainerDashboard" replace />;
+      }
+    }
+  }
+  
+  return <VerificationTab />;
+};
 
 function App() {
   return (
@@ -33,6 +58,11 @@ function App() {
           </div>
         }
       />
+
+      {/* Authentication Routes */}
+      <Route path="/signup" element={<Signup />} />
+      <Route path="/login" element={<Signin />} />
+      <Route path="/verify" element={<VerificationRoute />} />
 
       {/* Protected Dashboard Route */}
       <Route element={<ProtectedRoute />}>

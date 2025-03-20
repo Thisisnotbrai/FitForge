@@ -1,8 +1,39 @@
+/* eslint-disable no-undef */
 const { User: User } = require("../models/database");
 const send = require("../utils/response");
 const argon2 = require("argon2");
 const jwt = require("jsonwebtoken");
+const nodemailer = require("nodemailer");
 require("dotenv").config();
+
+const transporter = nodemailer.createTransport({
+  host: "smtp.gmail.com",
+  port: 587,
+  secure: false, // true for port 465, false for other ports
+  auth: {
+    user: "fit.forge.app.gc@gmail.com",
+    pass: "nkng ndmj kcir mwjk",
+  },
+});
+
+const verificationEmail = async (email, token) => {
+
+  try {
+    await transporter.sendMail({
+      from: '"Fit Forge" <fit.forge.app.gc@gmail.com>',
+      to: email,
+      subject: "Email Verification",
+      text: "Please verify your email address",
+      html: `<p>Please verify your email address by clicking the link below: ${token}</p>`,
+      
+
+    });
+    return true;
+  } catch (error) {
+    console.log(error);
+    return false;
+  }
+}
 
 exports.userLogin = async (req, res) => {
   try {
@@ -61,11 +92,19 @@ exports.registerUser = async (req, res) => {
     }
 
     const hash = await argon2.hash(user_password);
+
+    const verificationcode = Math.floor(100000 + Math.random() * 900000);
+    const emailsent = await verificationEmail(user_email, verificationcode);
+    if (!emailsent) {
+      return send.sendResponseMessage(res, 500, null, "Email not sent");
+    }
     const newUser = await User.create({
       user_name: user_name,
       user_email: user_email,
       user_password: hash,
       user_role: user_role || "trainee",
+      verification_code: verificationcode,
+      is_verified: false,
     });
 
     return send.sendResponseMessage(
@@ -78,3 +117,26 @@ exports.registerUser = async (req, res) => {
     return send.sendErrorMessage(res, 500, error);
   }
 };
+
+exports.verifyEmail = async (req, res) => {
+  try {
+    const { email, verification_code } = req.body;
+    const existingUser = await User.findOne({ where: { user_email: email } });
+    if (!existingUser) {
+      return send.sendResponseMessage(res, 404, null, "User not found");
+    }
+    if (existingUser.is_verified) {
+      return send.sendResponseMessage(res, 400, null, "Email already verified");
+    }
+    if (existingUser.verification_code != verification_code) {
+      return send.sendResponseMessage(res, 400, null, "Invalid verification code");
+    }
+    existingUser.is_verified = true;
+    await existingUser.save();
+    return send.sendResponseMessage(res, 200, null, "Email verified successfully");
+  } catch (error) {
+    return send.sendErrorMessage(res, 500, error);
+  }
+
+
+}
