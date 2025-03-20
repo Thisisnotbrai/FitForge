@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 exports.sendResponseMessage = async(res, status, data, message) => {
     return res.status(status).json({"data": data, message});
 }

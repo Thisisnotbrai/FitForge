@@ -1,7 +1,9 @@
+/* eslint-disable no-undef */
 const express = require("express");
 const app = express();
 const parser = require("body-parser");
 const morgan = require("morgan");
+// eslint-disable-next-line no-unused-vars
 const database = require("./models/database");
 const cors = require("cors");
 
@@ -31,9 +33,12 @@ app.use((req, res, next) => {
 });
 
 const userRoutes = require("./routes/UserRoutes");
+const exerciseRoutes = require("./routes/ExerciseRoutes");
 
 app.use("/users", userRoutes);
+app.use("/exercises", exerciseRoutes);
 
+// eslint-disable-next-line no-unused-vars
 app.use((req, res, next) => {
   const error = new Error("Not found");
   res.json({
@@ -41,8 +46,10 @@ app.use((req, res, next) => {
   });
 });
 
+// eslint-disable-next-line no-unused-vars
 app.use((req, res, next) => {
   return res.status(error.status || 500);
+  // eslint-disable-next-line no-unreachable
   res.json({
     message: error.message,
   });
