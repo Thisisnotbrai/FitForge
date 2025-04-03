@@ -25,16 +25,22 @@ module.exports = (sequelize, DataTypes) => {
     user_role: {
       type: DataTypes.ENUM('trainee', 'trainer', 'admin'),
       allowNull: false,
-      defaultValue: 'trainee'
-  },
-  verification_code: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-  },
-  is_verified: {
-    type: DataTypes.BOOLEAN,
-    allowNull: false,
- }
+      defaultValue: 'trainee',
+    },
+    verification_code: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    is_verified: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    },
+    is_approved: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false, // Trainers are not approved by default
+    }
   });
 
   return User;

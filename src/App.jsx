@@ -11,6 +11,9 @@ import Dashboard from "./components/Views/Trainee/Dashboard";
 import TrainerDashboard from "./components/Views/Trainer/TrainerDashboard"; // Import the TrainerDashboard
 import UserProfile from "./components/Views/Trainee/UserProfile"; // Import the UserProfile component
 import ProtectedRoute from "./components/Views/ProtectedRoute";
+import AdminProtectedRoute from "./components/Views/AdminProtectedRoute"; // Import the AdminProtectedRoute
+import AdminSignin from "./components/Views/Admin/AdminSignin"; // Import the AdminSignin component
+import AdminDashboard from "./components/Views/Admin/AdminDashboard"; // Import the AdminDashboard component
 import DashboardLayout from "./components/Views/DashboardLayout"; // Import the layout
 import Signup from "./components/Signup/Signup"; // Import Signup component
 import VerificationTab from "./components/Signup/VerificationTab"; // Import VerificationTab component
@@ -69,6 +72,12 @@ function App() {
       <Route path="/signup" element={<Signup />} />
       <Route path="/login" element={<Signin />} />
       <Route path="/verify" element={<VerificationRoute />} />
+      
+      {/* Admin Routes */}
+      <Route path="/admin/login" element={<AdminSignin />} />
+      <Route element={<AdminProtectedRoute />}>
+        <Route path="/admin/dashboard" element={<AdminDashboard />} />
+      </Route>
 
       {/* Redirect any onboarding attempts to Dashboard */}
       <Route path="/onboarding" element={<Navigate to="/Dashboard" replace />} />

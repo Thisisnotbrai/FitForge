@@ -1,0 +1,100 @@
+.admin-dashboard-container {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.admin-dashboard-title {
+  margin-bottom: 2rem;
+  color: #343a40;
+  font-size: 2rem;
+  border-bottom: 2px solid #17a2b8;
+  padding-bottom: 0.5rem;
+}
+
+.admin-section {
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.admin-section-title {
+  margin-bottom: 1.5rem;
+  color: #343a40;
+  font-size: 1.5rem;
+}
+
+.admin-trainer-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.admin-trainer-card {
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  padding: 1.2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-left: 4px solid #17a2b8;
+}
+
+.admin-trainer-details h3 {
+  margin: 0 0 0.5rem 0;
+  color: #343a40;
+}
+
+.admin-trainer-details p {
+  margin: 0;
+  color: #6c757d;
+}
+
+.admin-approve-button {
+  background-color: #28a745;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.3s;
+}
+
+.admin-approve-button:hover {
+  background-color: #218838;
+}
+
+.admin-loading {
+  text-align: center;
+  color: #6c757d;
+  padding: 2rem 0;
+  font-size: 1.1rem;
+}
+
+.admin-no-data {
+  text-align: center;
+  color: #6c757d;
+  padding: 2rem 0;
+  font-size: 1.1rem;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+}
+
+.admin-error-message {
+  background-color: #f8d7da;
+  color: #721c24;
+  padding: 0.75rem 1.25rem;
+  border-radius: 5px;
+  margin-bottom: 1.5rem;
+}
+
+.admin-success-message {
+  background-color: #d4edda;
+  color: #155724;
+  padding: 0.75rem 1.25rem;
+  border-radius: 5px;
+  margin-bottom: 1.5rem;
+}

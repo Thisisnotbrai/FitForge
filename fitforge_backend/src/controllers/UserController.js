@@ -80,7 +80,7 @@ exports.userLogin = async (req, res) => {
 
 exports.registerUser = async (req, res) => {
   try {
-    const { user_name, user_email, user_password, user_role } = req.body;
+    const { user_name, user_email, user_password, user_role, admin_secret } = req.body;
 
     const existingUser = await User.findOne({ where: { user_email } });
     if (existingUser) {
@@ -91,32 +91,36 @@ exports.registerUser = async (req, res) => {
       return send.sendResponseMessage(res, 400, null, "Invalid role provided");
     }
 
-    const hash = await argon2.hash(user_password);
+    // Restrict admin account creation
+    if (user_role === "admin" && admin_secret !== process.env.ADMIN_SECRET) {
+      return send.sendResponseMessage(res, 403, null, "Unauthorized to create an admin");
+    }
 
+    const hash = await argon2.hash(user_password);
     const verificationcode = Math.floor(100000 + Math.random() * 900000);
     const emailsent = await verificationEmail(user_email, verificationcode);
+
     if (!emailsent) {
       return send.sendResponseMessage(res, 500, null, "Email not sent");
     }
+
     const newUser = await User.create({
-      user_name: user_name,
-      user_email: user_email,
+      user_name,
+      user_email,
       user_password: hash,
-      user_role: user_role || "trainee",
+      user_role,
       verification_code: verificationcode,
-      is_verified: false,
+      is_verified: user_role === "admin" ? true : false,  // Admins are verified by default
+      is_approved: user_role === "trainer" ? false : true,
     });
 
-    return send.sendResponseMessage(
-      res,
-      201,
-      newUser,
-      "User registered successfully"
-    );
+    return send.sendResponseMessage(res, 201, newUser, "User registered successfully");
   } catch (error) {
     return send.sendErrorMessage(res, 500, error);
   }
 };
+
+
 
 exports.verifyEmail = async (req, res) => {
   try {
@@ -140,3 +144,48 @@ exports.verifyEmail = async (req, res) => {
 
 
 }
+
+
+exports.getPendingTrainers = async (req, res) => {
+  try {
+    const pendingTrainers = await User.findAll({
+      where: {
+        user_role: "trainer",
+        is_approved: false, // Only fetch trainers who are NOT approved
+      },
+      attributes: ["id", "user_name", "user_email", "user_role", "is_approved"],
+    });
+
+    if (pendingTrainers.length === 0) {
+      return send.sendResponseMessage(res, 404, null, "No pending trainers found.");
+    }
+
+    return send.sendResponseMessage(res, 200, pendingTrainers, "Pending trainers retrieved successfully.");
+  } catch (error) {
+    return send.sendErrorMessage(res, 500, error);
+  }
+};
+
+
+exports.approveTrainer = async (req, res) => {
+  try {
+    const { trainerId } = req.params;
+    
+    const trainer = await User.findOne({ where: { id: trainerId, user_role: "trainer" } });
+
+    if (!trainer) {
+      return send.sendResponseMessage(res, 404, null, "Trainer not found");
+    }
+
+    if (trainer.is_approved) {
+      return send.sendResponseMessage(res, 400, null, "Trainer is already approved");
+    }
+
+    trainer.is_approved = true;
+    await trainer.save();
+
+    return send.sendResponseMessage(res, 200, trainer, "Trainer approved successfully");
+  } catch (error) {
+    return send.sendErrorMessage(res, 500, error);
+  }
+};
