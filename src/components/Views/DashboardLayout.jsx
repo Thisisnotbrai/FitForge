@@ -3,7 +3,7 @@ import { Outlet, useNavigate, Link, useLocation } from "react-router-dom";
 import "./DashboardLayout.css";
 import logo from "../../assets/FitForge Logo.jpg"; // Importing the logo
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faUser, faHome, faUserTie, faHandshake, faChartLine, faSignOutAlt, faDumbbell } from "@fortawesome/free-solid-svg-icons";
+import { faUser, faHome, faUserTie, faHandshake, faChartLine, faSignOutAlt, faDumbbell, faAppleAlt } from "@fortawesome/free-solid-svg-icons";
 import Dashboard from "./Trainee/Dashboard"; // Import the Dashboard component
 import ChatbotWidget from "../Chatbot/ChatbotWidget"; // Import the ChatbotWidget
 
@@ -61,6 +61,12 @@ const DashboardLayout = () => {
             className={`nav-link ${isActive('/workout') ? 'active' : ''}`}
           >
             <FontAwesomeIcon icon={faDumbbell} /> <span>Workout</span>
+          </Link>
+          <Link 
+            to="/nutrition" 
+            className={`nav-link ${isActive('/nutrition') ? 'active' : ''}`}
+          >
+            <FontAwesomeIcon icon={faAppleAlt} /> <span>Nutrition</span>
           </Link>
           <Link 
             to="/progress" 

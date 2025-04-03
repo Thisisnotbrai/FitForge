@@ -15,12 +15,12 @@ import DashboardLayout from "./components/Views/DashboardLayout"; // Import the 
 import Signup from "./components/Signup/Signup"; // Import Signup component
 import VerificationTab from "./components/Signup/VerificationTab"; // Import VerificationTab component
 import Signin from "./components/Signin/Signin"; // Import Signin component
-import UserOnboarding from "./components/Onboarding/UserOnboarding"; // Import the UserOnboarding component
 // Import the actual component files
 import YourTrainer from "./components/Views/Trainee/YourTrainer";
 import Hire from "./components/Views/Trainee/Hire";
 import Progress from "./components/Views/Trainee/Progress";
 import Workout from "./components/Views/Trainee/Workout"; // Import the new Workout component
+import Nutrition from "./components/Views/Trainee/Nutrition/Nutrition"; // Import the Nutrition component
 import "./App.css";
 
 // Component to check if user is already verified and redirect accordingly
@@ -43,83 +43,6 @@ const VerificationRoute = () => {
   }
   
   return <VerificationTab />;
-};
-
-// Component to check if user needs onboarding
-const OnboardingCheck = () => {
-  try {
-    // First check if user is logged in at all
-    const userString = localStorage.getItem("user");
-    if (!userString) {
-      console.log("User not logged in, showing regular Dashboard");
-      return <Dashboard />;
-    }
-    
-    const userProfile = JSON.parse(localStorage.getItem("userProfile") || "{}");
-    const user = JSON.parse(userString || "{}");
-    
-    console.log("Dashboard route - checking onboarding status from userProfile:", userProfile);
-    console.log("Dashboard route - checking onboarding status from user:", user);
-    
-    // Check both locations for onboardingCompleted flag
-    const isOnboardingCompleted = userProfile.onboardingCompleted === true || user.onboardingCompleted === true;
-    
-    // If onboarding is not completed, redirect to onboarding
-    if (!isOnboardingCompleted) {
-      console.log("Onboarding not completed, redirecting to onboarding");
-      return <Navigate to="/onboarding" replace />;
-    }
-    
-    // Otherwise, render the Dashboard
-    console.log("Onboarding completed, showing Dashboard");
-    return <Dashboard />;
-  } catch (error) {
-    console.error("Error in OnboardingCheck:", error);
-    // If there's an error, just show the Dashboard
-    return <Dashboard />;
-  }
-};
-
-// Component to prevent already onboarded users from accessing the onboarding route
-const OnboardingGuard = () => {
-  try {
-    const userProfile = JSON.parse(localStorage.getItem("userProfile") || "{}");
-    const user = JSON.parse(localStorage.getItem("user") || "{}");
-    
-    console.log("Onboarding route - checking completion status from userProfile:", userProfile);
-    console.log("Onboarding route - checking completion status from user:", user);
-    
-    // Check both locations for onboardingCompleted flag
-    const isOnboardingCompleted = userProfile.onboardingCompleted === true || user.onboardingCompleted === true;
-    
-    // If onboarding is already completed, redirect to dashboard
-    if (isOnboardingCompleted) {
-      console.log("Onboarding already completed, redirecting to Dashboard");
-      return <Navigate to="/Dashboard" replace />;
-    }
-    
-    // Otherwise, render the Onboarding component
-    console.log("Onboarding not completed, showing Onboarding component");
-    return <UserOnboarding />;
-  } catch (error) {
-    console.error("Error in OnboardingGuard:", error);
-    // If there's an error, let's still show the onboarding
-    return <UserOnboarding />;
-  }
-};
-
-// Reset onboarding status for debugging - access via /reset-onboarding
-const ResetOnboarding = () => {
-  try {
-    const userProfile = JSON.parse(localStorage.getItem("userProfile") || "{}");
-    userProfile.onboardingCompleted = false;
-    localStorage.setItem("userProfile", JSON.stringify(userProfile));
-    console.log("Onboarding status reset to false");
-    return <Navigate to="/onboarding" replace />;
-  } catch (error) {
-    console.error("Error resetting onboarding status:", error);
-    return <div>Error resetting onboarding status</div>;
-  }
 };
 
 function App() {
@@ -147,18 +70,13 @@ function App() {
       <Route path="/login" element={<Signin />} />
       <Route path="/verify" element={<VerificationRoute />} />
 
-      {/* Debug utility */}
-      <Route path="/reset-onboarding" element={<ResetOnboarding />} />
-
-      {/* Onboarding Route with Guard */}
-      <Route element={<ProtectedRoute />}>
-        <Route path="/onboarding" element={<OnboardingGuard />} />
-      </Route>
+      {/* Redirect any onboarding attempts to Dashboard */}
+      <Route path="/onboarding" element={<Navigate to="/Dashboard" replace />} />
 
       {/* Protected Dashboard Route */}
       <Route element={<ProtectedRoute />}>
         <Route element={<DashboardLayout />}>
-          <Route path="/Dashboard" element={<OnboardingCheck />} />
+          <Route path="/Dashboard" element={<Dashboard />} />
           <Route path="/TrainerDashboard" element={<TrainerDashboard />} />
           <Route path="/profile" element={<UserProfile />} />
           {/* New navigation routes */}
@@ -166,6 +84,7 @@ function App() {
           <Route path="/hire" element={<Hire />} />
           <Route path="/workout" element={<Workout />} />
           <Route path="/progress" element={<Progress />} />
+          <Route path="/nutrition" element={<Nutrition />} />
         </Route>
       </Route>
     </Routes>

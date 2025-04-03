@@ -26,6 +26,11 @@ const Signin = () => {
     e.preventDefault();
 
     try {
+      console.log("Attempting login for:", user_email);
+      
+      // Reset any existing errors
+      setError("");
+      
       const response = await axios.post("http://localhost:3000/users/login", {
         user_email,
         user_password,
@@ -38,18 +43,20 @@ const Signin = () => {
         const token = response.data.data; // This is the actual token
         const user = response.data.message.User; // This is the user object
 
+        // VERY IMPORTANT: Add email field to the user object if not present (for identity checking)
+        if (!user.email && user_email) {
+          user.email = user_email;
+        }
+        
         // Debugging: Log the user object and verification status
-        console.log("User object:", user);
+        console.log("User object from server:", user);
         console.log("Is verified?", user.is_verified);
-
-        // Save token and user info first
+        
+        // Force-set the token first
         localStorage.setItem("token", token);
         localStorage.setItem("user", JSON.stringify(user));
 
-        console.log("Token and user info saved:", token, user); // Debugging
-
         // Check if user is verified - only redirect if explicitly false
-        // Some backends might return undefined instead of false
         if (user.is_verified === false) {
           // Store email for verification page
           localStorage.setItem("pendingVerificationEmail", user_email);
@@ -61,7 +68,7 @@ const Signin = () => {
         // Check user role and navigate accordingly
         if (user?.role === "trainee") {
           console.log("Navigating to /Dashboard");
-          navigate("/Dashboard", { replace: true }); // Ensure navigation
+          navigate("/Dashboard", { replace: true });
         } else if (user?.role === "trainer") {
           console.log("Navigating to /TrainerDashboard");
           navigate("/TrainerDashboard", { replace: true });
