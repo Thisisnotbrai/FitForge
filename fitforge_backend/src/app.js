@@ -34,9 +34,11 @@ app.use((req, res, next) => {
 
 const userRoutes = require("./routes/UserRoutes");
 const exerciseRoutes = require("./routes/ExerciseRoutes");
+const workoutRoutes = require("./routes/WorkoutRoutes");
 
 app.use("/users", userRoutes);
 app.use("/exercises", exerciseRoutes);
+app.use("/workouts", workoutRoutes);
 
 // eslint-disable-next-line no-unused-vars
 app.use((req, res, next) => {

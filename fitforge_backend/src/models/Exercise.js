@@ -1,26 +1,40 @@
 /* eslint-disable no-undef */
 module.exports = (sequelize, DataTypes) => {
-    const Exercise = sequelize.define("Exercise", {
-      picture: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        validate: {
-          isUrl: true,
-        },
-      },
-      reps_sets: {
-        type: DataTypes.STRING,
-        allowNull: false,
-      },
-      muscle_group: {
-        type: DataTypes.ENUM('Biceps', 'Triceps', 'Back', 'Chest', 'Legs', 'Forearms'),
-        allowNull: false,
-      },
-      direction: {
-        type: DataTypes.STRING,
-        allowNull: false,
-      },
-    });
-  
-    return Exercise;
-  };
+  const Exercise = sequelize.define("Exercise", {
+    workout_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    exercise_name: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    sets: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    reps: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    work_time: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    rest_time: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    rest_between: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+
+    exercise_order: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+  });
+
+  return Exercise;
+};

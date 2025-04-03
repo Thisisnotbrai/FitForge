@@ -22,18 +22,24 @@ import Signin from "./components/Signin/Signin"; // Import Signin component
 import YourTrainer from "./components/Views/Trainee/YourTrainer";
 import Hire from "./components/Views/Trainee/Hire";
 import Progress from "./components/Views/Trainee/Progress";
-import Workout from "./components/Views/Trainee/Workout"; // Import the new Workout component
+import Workout from "./components/Views/Trainee/Workout/Workout"; // Import the new Workout component
+import WorkoutDetail from "./components/Views/Trainee/Workout/WorkoutDetail"; // Import WorkoutDetail
+import WorkoutList from "./components/Views/Trainee/Workout/WorkoutList"; // Import WorkoutList
+import ActiveWorkout from "./components/Views/Trainee/Workout/ActiveWorkout"; // Import ActiveWorkout
 import Nutrition from "./components/Views/Trainee/Nutrition/Nutrition"; // Import the Nutrition component
 import "./App.css";
 
 // Component to check if user is already verified and redirect accordingly
 const VerificationRoute = () => {
   const userString = localStorage.getItem("user");
-  
+
   if (userString) {
     const user = JSON.parse(userString);
-    console.log("User verification status in VerificationRoute:", user.is_verified);
-    
+    console.log(
+      "User verification status in VerificationRoute:",
+      user.is_verified
+    );
+
     // If user is already logged in and verified, redirect to dashboard
     // Only check if explicitly true (not undefined, empty, etc.)
     if (user.is_verified === true) {
@@ -44,7 +50,7 @@ const VerificationRoute = () => {
       }
     }
   }
-  
+
   return <VerificationTab />;
 };
 
@@ -72,7 +78,7 @@ function App() {
       <Route path="/signup" element={<Signup />} />
       <Route path="/login" element={<Signin />} />
       <Route path="/verify" element={<VerificationRoute />} />
-      
+
       {/* Admin Routes */}
       <Route path="/admin/login" element={<AdminSignin />} />
       <Route element={<AdminProtectedRoute />}>
@@ -80,7 +86,10 @@ function App() {
       </Route>
 
       {/* Redirect any onboarding attempts to Dashboard */}
-      <Route path="/onboarding" element={<Navigate to="/Dashboard" replace />} />
+      <Route
+        path="/onboarding"
+        element={<Navigate to="/Dashboard" replace />}
+      />
 
       {/* Protected Dashboard Route */}
       <Route element={<ProtectedRoute />}>
@@ -92,6 +101,9 @@ function App() {
           <Route path="/your-trainer" element={<YourTrainer />} />
           <Route path="/hire" element={<Hire />} />
           <Route path="/workout" element={<Workout />} />
+          <Route path="/workouts" element={<WorkoutList />} />
+          <Route path="/workout/:id" element={<WorkoutDetail />} />
+          <Route path="/workout/:id/active" element={<ActiveWorkout />} />
           <Route path="/progress" element={<Progress />} />
           <Route path="/nutrition" element={<Nutrition />} />
         </Route>

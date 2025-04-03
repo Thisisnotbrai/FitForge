@@ -24,6 +24,8 @@ db.sequelize = sequelize;
 
 db.User = require("../models/User")(sequelize, DataTypes);
 db.Exercise = require("../models/exercise")(sequelize, DataTypes);
+db.Workouts = require("../models/Workouts")(sequelize, DataTypes);
+db.WorkoutHistory = require("../models/WorkoutHistory")(sequelize, DataTypes);
 
 db.sequelize
   .sync({ alter: false })

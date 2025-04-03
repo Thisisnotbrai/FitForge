@@ -1,0 +1,72 @@
+.workout-detail {
+  padding: 20px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.workout-header {
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.workout-specs {
+  display: flex;
+  gap: 15px;
+  margin: 10px 0;
+  color: #555;
+}
+
+.exercises-section {
+  margin: 30px 0;
+}
+
+.exercise-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.exercise-item {
+  display: flex;
+  align-items: center;
+  padding: 15px;
+  border-radius: 8px;
+  background-color: #f5f5f5;
+}
+
+.exercise-number {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background-color: #3498db;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 15px;
+}
+
+.exercise-details {
+  display: flex;
+  gap: 15px;
+  font-size: 0.9rem;
+  color: #555;
+  margin-top: 5px;
+}
+
+.btn-start-workout {
+  width: 100%;
+  padding: 15px;
+  background-color: #27ae60;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-start-workout:hover {
+  background-color: #219653;
+}

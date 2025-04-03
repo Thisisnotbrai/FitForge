@@ -40,12 +40,12 @@ const Header = () => {
           Sign Up
         </button>
 
-        <Modal isOpen={isSigninOpen} onClose={closeSigninModal}>
+        <Modal isOpen={isSigninOpen} onClose={closeSigninModal} size="auth">
           <Signin />
         </Modal>
 
         {/* Signup Modal */}
-        <Modal isOpen={isSignupOpen} onClose={closeSignupModal}>
+        <Modal isOpen={isSignupOpen} onClose={closeSignupModal} size="auth">
           <Signup />
         </Modal>
       </div>
