@@ -189,3 +189,34 @@ exports.approveTrainer = async (req, res) => {
     return send.sendErrorMessage(res, 500, error);
   }
 };
+
+exports.getTrainers = async (req, res) => {
+  try {
+    const trainers = await User.findAll({
+      where: {
+        user_role: "trainer",
+        is_approved: true, // Only fetch approved trainers
+      },
+      attributes: ["id", "user_name", "user_email", "user_role", "is_verified", "is_approved"],
+    });
+
+    return send.sendResponseMessage(res, 200, trainers, "Trainers retrieved successfully.");
+  } catch (error) {
+    return send.sendErrorMessage(res, 500, error);
+  }
+};
+
+exports.getTrainees = async (req, res) => {
+  try {
+    const trainees = await User.findAll({
+      where: {
+        user_role: "trainee",
+      },
+      attributes: ["id", "user_name", "user_email", "user_role", "is_verified"],
+    });
+
+    return send.sendResponseMessage(res, 200, trainees, "Trainees retrieved successfully.");
+  } catch (error) {
+    return send.sendErrorMessage(res, 500, error);
+  }
+};
