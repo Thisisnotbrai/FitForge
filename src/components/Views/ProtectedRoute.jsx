@@ -1,42 +1,59 @@
 import { Navigate, Outlet, useLocation } from "react-router-dom";
+import PropTypes from "prop-types";
 
-const ProtectedRoute = () => {
+const ProtectedRoute = ({ allowedRoles }) => {
   const token = localStorage.getItem("token");
   const userString = localStorage.getItem("user");
   const location = useLocation();
+
   console.log("Current path in ProtectedRoute:", location.pathname);
   console.log("Token in ProtectedRoute:", token);
-  
-  // If no token, redirect to login
+
   if (!token) {
     console.log("No token found, redirecting to login");
     return <Navigate to="/login" />;
   }
-  
-  // Check if user data exists and is valid
+
   if (!userString) {
     console.log("No user data found, redirecting to login");
     return <Navigate to="/login" />;
   }
-  
+
   try {
     const user = JSON.parse(userString);
-    console.log("User verification status in ProtectedRoute:", user.is_verified);
-    
-    // Only redirect if explicitly false (not undefined, null, etc.)
+    const userRole = user?.role;
+    console.log("User role in ProtectedRoute:", userRole);
+    console.log(
+      "User verification status in ProtectedRoute:",
+      user.is_verified
+    );
+
+    // Redirect if user is not verified
     if (user.is_verified === false) {
-      // Store email for verification page
       localStorage.setItem("pendingVerificationEmail", user.email);
       console.log("User not verified, redirecting to verify page");
       return <Navigate to="/verify" state={{ email: user.email }} />;
     }
+
+    // Check role access
+    if (allowedRoles && !allowedRoles.includes(userRole)) {
+      console.log(
+        "User not authorized for this route, redirecting to default dashboard"
+      );
+      const defaultDashboard =
+        userRole === "trainer" ? "/TrainerDashboard" : "/Dashboard";
+      return <Navigate to={defaultDashboard} />;
+    }
   } catch (error) {
     console.error("Error parsing user data in ProtectedRoute:", error);
-    // In case of error, continue to render the protected route
+    return <Navigate to="/login" />;
   }
-  
-  // If we have a token and user is either verified or no user data exists, render the route
+
   return <Outlet />;
+};
+
+ProtectedRoute.propTypes = {
+  allowedRoles: PropTypes.arrayOf(PropTypes.string),
 };
 
 export default ProtectedRoute;

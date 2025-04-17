@@ -27,6 +27,7 @@ import WorkoutDetail from "./components/Views/Trainee/Workout/WorkoutDetail"; //
 import WorkoutList from "./components/Views/Trainee/Workout/WorkoutList"; // Import WorkoutList
 import ActiveWorkout from "./components/Views/Trainee/Workout/ActiveWorkout"; // Import ActiveWorkout
 import Nutrition from "./components/Views/Trainee/Nutrition/Nutrition"; // Import the Nutrition component
+import YourTrainees from "./components/Views/Trainer/YourTrainees";
 import "./App.css";
 
 // Component to check if user is already verified and redirect accordingly
@@ -97,8 +98,18 @@ function App() {
           <Route path="/Dashboard" element={<Dashboard />} />
           <Route path="/TrainerDashboard" element={<TrainerDashboard />} />
           <Route path="/profile" element={<UserProfile />} />
-          {/* New navigation routes */}
-          <Route path="/your-trainer" element={<YourTrainer />} />
+
+          {/* Trainee-only route */}
+          <Route element={<ProtectedRoute allowedRoles={["trainee"]} />}>
+            <Route path="/your-trainer" element={<YourTrainer />} />
+          </Route>
+
+          {/* Trainer-only route */}
+          <Route element={<ProtectedRoute allowedRoles={["trainer"]} />}>
+            <Route path="/your-trainee" element={<YourTrainees />} />
+          </Route>
+
+          {/* Shared routes */}
           <Route path="/hire" element={<Hire />} />
           <Route path="/workout" element={<Workout />} />
           <Route path="/workouts" element={<WorkoutList />} />
