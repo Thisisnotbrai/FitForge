@@ -45,7 +45,7 @@ const DashboardLayout = () => {
   const isActive = (path) => location.pathname === path;
 
   return (
-    <div className="dashboard-container">
+    <div className="dashboard-container" data-role={userRole}>
       <header className="header">
         <div
           className="logo"
@@ -91,30 +91,34 @@ const DashboardLayout = () => {
             </span>
           </Link>
 
-          <Link
-            to="/hire"
-            className={`nav-link ${isActive("/hire") ? "active" : ""}`}
-          >
-            <FontAwesomeIcon icon={faHandshake} /> <span>Hire</span>
-          </Link>
-          <Link
-            to="/workout"
-            className={`nav-link ${isActive("/workout") ? "active" : ""}`}
-          >
-            <FontAwesomeIcon icon={faDumbbell} /> <span>Workout</span>
-          </Link>
-          <Link
-            to="/nutrition"
-            className={`nav-link ${isActive("/nutrition") ? "active" : ""}`}
-          >
-            <FontAwesomeIcon icon={faAppleAlt} /> <span>Nutrition</span>
-          </Link>
-          <Link
-            to="/progress"
-            className={`nav-link ${isActive("/progress") ? "active" : ""}`}
-          >
-            <FontAwesomeIcon icon={faChartLine} /> <span>Progress</span>
-          </Link>
+          {userRole === "trainee" && (
+            <>
+              <Link
+                to="/hire"
+                className={`nav-link ${isActive("/hire") ? "active" : ""}`}
+              >
+                <FontAwesomeIcon icon={faHandshake} /> <span>Hire</span>
+              </Link>
+              <Link
+                to="/workout"
+                className={`nav-link ${isActive("/workout") ? "active" : ""}`}
+              >
+                <FontAwesomeIcon icon={faDumbbell} /> <span>Workout</span>
+              </Link>
+              <Link
+                to="/nutrition"
+                className={`nav-link ${isActive("/nutrition") ? "active" : ""}`}
+              >
+                <FontAwesomeIcon icon={faAppleAlt} /> <span>Nutrition</span>
+              </Link>
+              <Link
+                to="/progress"
+                className={`nav-link ${isActive("/progress") ? "active" : ""}`}
+              >
+                <FontAwesomeIcon icon={faChartLine} /> <span>Progress</span>
+              </Link>
+            </>
+          )}
           <Link
             to="/profile"
             className={`profile-link ${isActive("/profile") ? "active" : ""}`}

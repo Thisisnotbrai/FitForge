@@ -21,14 +21,14 @@ const AdminProtectedRoute = () => {
       }
 
       const user = JSON.parse(userString);
-      
+
       // Check if user is an admin
       if (user && user.role === "admin") {
         setIsAdmin(true);
       } else {
         setIsAdmin(false);
       }
-      
+
       setLoading(false);
     } catch (error) {
       console.error("Error checking admin status:", error);
@@ -51,4 +51,4 @@ const AdminProtectedRoute = () => {
   return <Outlet />;
 };
 
-export default AdminProtectedRoute; 
+export default AdminProtectedRoute;

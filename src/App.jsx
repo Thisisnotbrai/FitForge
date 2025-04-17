@@ -102,6 +102,13 @@ function App() {
           {/* Trainee-only route */}
           <Route element={<ProtectedRoute allowedRoles={["trainee"]} />}>
             <Route path="/your-trainer" element={<YourTrainer />} />
+            <Route path="/hire" element={<Hire />} />
+            <Route path="/workout" element={<Workout />} />
+            <Route path="/workouts" element={<WorkoutList />} />
+            <Route path="/workout/:id" element={<WorkoutDetail />} />
+            <Route path="/workout/:id/active" element={<ActiveWorkout />} />
+            <Route path="/progress" element={<Progress />} />
+            <Route path="/nutrition" element={<Nutrition />} />
           </Route>
 
           {/* Trainer-only route */}
@@ -110,13 +117,6 @@ function App() {
           </Route>
 
           {/* Shared routes */}
-          <Route path="/hire" element={<Hire />} />
-          <Route path="/workout" element={<Workout />} />
-          <Route path="/workouts" element={<WorkoutList />} />
-          <Route path="/workout/:id" element={<WorkoutDetail />} />
-          <Route path="/workout/:id/active" element={<ActiveWorkout />} />
-          <Route path="/progress" element={<Progress />} />
-          <Route path="/nutrition" element={<Nutrition />} />
         </Route>
       </Route>
     </Routes>
