@@ -1,27 +1,41 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './Timbur.css';
-import chatbotService from '../../services/chatbotService';
+import { processMessage } from '../../services/chatbotService';
 
 // Import Timburr image
 const timburImage = "https://img.pokemondb.net/sprites/black-white/anim/normal/timburr.gif";
 
 const Timbur = ({ onClose }) => {
-  const [messages, setMessages] = useState([
-    { text: "Hello! How can I help you today?", sender: 'bot', time: getCurrentTime() }
-  ]);
+  const [messages, setMessages] = useState([]);
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef(null);
 
-  // Get current time in HH:MM format
-  function getCurrentTime() {
-    const now = new Date();
-    const hours = now.getHours().toString().padStart(2, '0');
-    const minutes = now.getMinutes().toString().padStart(2, '0');
-    return `${hours}:${minutes}`;
-  }
+  // Load chat history on component mount
+  useEffect(() => {
+    const savedMessages = localStorage.getItem('chatHistory');
+    if (savedMessages) {
+      setMessages(JSON.parse(savedMessages));
+    } else {
+      // Add initial welcome message if no history exists
+      const welcomeMessage = {
+        type: 'bot',
+        text: "Hi! I'm Timbur, your fitness assistant. How can I help you today?",
+        timestamp: new Date().toISOString()
+      };
+      setMessages([welcomeMessage]);
+      localStorage.setItem('chatHistory', JSON.stringify([welcomeMessage]));
+    }
+  }, []);
 
-  // Auto-scroll to the bottom of the chat
+  // Save messages to localStorage whenever they change
+  useEffect(() => {
+    if (messages.length > 0) {
+      localStorage.setItem('chatHistory', JSON.stringify(messages));
+    }
+  }, [messages]);
+
+  // Scroll to bottom when messages update
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
@@ -30,48 +44,60 @@ const Timbur = ({ onClose }) => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  // Process user message and generate a bot response using the chatbot service
-  const processMessage = async (userMessage) => {
+  const handleInputChange = (e) => {
+    setInputValue(e.target.value);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!inputValue.trim()) return;
+
+    const userMessage = {
+      type: 'user',
+      text: inputValue.trim(),
+      timestamp: new Date().toISOString()
+    };
+
+    setMessages(prev => [...prev, userMessage]);
+    setInputValue('');
     setIsTyping(true);
-    
+
     try {
-      // Get response from chatbot service (now async)
-      const botResponse = await chatbotService.processMessage(userMessage);
-      
-      // Add the bot's response to the chat
-      setMessages(prevMessages => [
-        ...prevMessages,
-        { text: botResponse, sender: 'bot', time: getCurrentTime() }
-      ]);
+      const response = await processMessage(userMessage.text);
+      const botMessage = {
+        type: 'bot',
+        text: response,
+        timestamp: new Date().toISOString()
+      };
+      setMessages(prev => [...prev, botMessage]);
     } catch (error) {
-      console.error('Error in processMessage:', error);
-      // Add error message to chat
-      setMessages(prevMessages => [
-        ...prevMessages,
-        { text: "Sorry, I'm having trouble connecting right now. Please try again later.", sender: 'bot', time: getCurrentTime() }
-      ]);
+      console.error('Error processing message:', error);
+      const errorMessage = {
+        type: 'bot',
+        text: "I'm sorry, I encountered an error. Please try again.",
+        timestamp: new Date().toISOString()
+      };
+      setMessages(prev => [...prev, errorMessage]);
     } finally {
       setIsTyping(false);
     }
   };
 
-  // Handle sending a message
-  const handleSendMessage = (e) => {
-    e.preventDefault();
-    
-    if (inputValue.trim() === '') return;
-    
-    // Add user message to chat
-    setMessages(prevMessages => [
-      ...prevMessages,
-      { text: inputValue, sender: 'user', time: getCurrentTime() }
-    ]);
-    
-    // Process the message to get a response
-    processMessage(inputValue);
-    
-    // Clear input field
-    setInputValue('');
+  const formatTimestamp = (timestamp) => {
+    return new Date(timestamp).toLocaleTimeString([], { 
+      hour: '2-digit', 
+      minute: '2-digit'
+    });
+  };
+
+  const clearHistory = () => {
+    const welcomeMessage = {
+      type: 'bot',
+      text: "Chat history cleared. How can I help you today?",
+      timestamp: new Date().toISOString()
+    };
+    setMessages([welcomeMessage]);
+    localStorage.setItem('chatHistory', JSON.stringify([welcomeMessage]));
   };
 
   return (
@@ -84,65 +110,70 @@ const Timbur = ({ onClose }) => {
           <h2>Timburr</h2>
           <p className="status">Online</p>
         </div>
-        <button className="timbur-close-button" onClick={onClose}>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M18 6L6 18" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            <path d="M6 6L18 18" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+        <button 
+          className="timbur-close-button" 
+          onClick={onClose}
+          aria-label="Close chat"
+        >
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M12 4L4 12M4 4L12 12" stroke="white" strokeWidth="2" strokeLinecap="round"/>
           </svg>
         </button>
       </div>
-      
+
       <div className="timbur-messages">
         {messages.map((message, index) => (
           <div 
             key={index} 
-            className={`message-wrapper ${message.sender}-wrapper`}
+            className={`message-wrapper ${message.type}-wrapper`}
           >
-            {message.sender === 'bot' && (
+            {message.type === 'bot' && (
               <div className="message-icon">
                 <img src={timburImage} alt="Timburr" className="message-avatar" />
               </div>
             )}
             <div className="message-content">
-              <div className={`message ${message.sender}`}>
+              <div className={`message ${message.type}`}>
                 <p>{message.text}</p>
               </div>
-              <div className="message-time">{message.time}</div>
+              <span className="message-time">
+                {formatTimestamp(message.timestamp)}
+              </span>
             </div>
           </div>
         ))}
-        
         {isTyping && (
           <div className="message-wrapper bot-wrapper">
             <div className="message-icon">
               <img src={timburImage} alt="Timburr" className="message-avatar" />
             </div>
-            <div className="message-content">
-              <div className="message bot typing">
-                <span className="dot"></span>
-                <span className="dot"></span>
-                <span className="dot"></span>
-              </div>
+            <div className="message typing">
+              <div className="dot"></div>
+              <div className="dot"></div>
+              <div className="dot"></div>
             </div>
           </div>
         )}
-        
         <div ref={messagesEndRef} />
       </div>
-      
-      <form className="timbur-input-area" onSubmit={handleSendMessage}>
+
+      <form onSubmit={handleSubmit} className="timbur-input-area">
         <input
           type="text"
           value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
-          placeholder="Type a message..."
+          onChange={handleInputChange}
+          placeholder="Type your message..."
           className="timbur-input"
         />
-        <button type="submit" className="timbur-send-button">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="12" cy="12" r="11" fill="white" stroke="white" strokeWidth="1" />
-            <path d="M1 12H23" stroke="#f44336" strokeWidth="2" />
-            <circle cx="12" cy="12" r="3" fill="white" stroke="#f44336" strokeWidth="1.5" />
+        <button 
+          type="submit" 
+          className="timbur-send-button"
+          disabled={!inputValue.trim()}
+          aria-label="Send message"
+        >
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="11" stroke="#e74c3c" strokeWidth="2"/>
+            <path d="M8 12L16 12M16 12L12 8M16 12L12 16" stroke="#e74c3c" strokeWidth="2" strokeLinecap="round"/>
           </svg>
         </button>
       </form>
