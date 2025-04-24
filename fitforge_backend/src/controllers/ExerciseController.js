@@ -27,7 +27,12 @@ const upload = multer({ storage });
 exports.getExercises = async (req, res) => {
   try {
     const exercises = await Exercise.findAll();
-    return send.sendResponseMessage(res, 200, exercises, "Exercises retrieved successfully");
+    return send.sendResponseMessage(
+      res,
+      200,
+      exercises,
+      "Exercises retrieved successfully"
+    );
   } catch (error) {
     return send.sendErrorMessage(res, 500, error);
   }
@@ -39,14 +44,18 @@ exports.addExercise = [
   async (req, res) => {
     try {
       const { reps_sets, muscle_group, direction } = req.body;
-      
+
       if (!req.file) {
         return send.sendResponseMessage(res, 400, null, "Picture is required");
       }
-      
+
       const picturePath = req.file.filename; // Save only the filename instead of the full path
 
-      if (!['Biceps', 'Triceps', 'Back', 'Chest', 'Legs', 'Forearms'].includes(muscle_group)) {
+      if (
+        !["Biceps", "Triceps", "Back", "Chest", "Legs", "Forearms"].includes(
+          muscle_group
+        )
+      ) {
         return send.sendResponseMessage(res, 400, null, "Invalid muscle group");
       }
 
@@ -57,7 +66,12 @@ exports.addExercise = [
         direction,
       });
 
-      return send.sendResponseMessage(res, 201, newExercise, "Exercise added successfully");
+      return send.sendResponseMessage(
+        res,
+        201,
+        newExercise,
+        "Exercise added successfully"
+      );
     } catch (error) {
       return send.sendErrorMessage(res, 500, error);
     }
