@@ -2,18 +2,22 @@
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import "./Dashboard.css";
+import Modal from "../../../components/Modal";
 // When packages are installed, uncomment these imports:
 // import { Calendar, momentLocalizer } from 'react-big-calendar';
 // import moment from 'moment';
 // import 'react-big-calendar/lib/css/react-big-calendar.css';
 
-const Dashboard = () => {
+// Define the Dashboard component
+function Dashboard() {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [events, setEvents] = useState([]);
   const [showCalendarModal, setShowCalendarModal] = useState(false);
+  const [showAllEventsModal, setShowAllEventsModal] = useState(false);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showEventModal, setShowEventModal] = useState(false);
+  const [selectedEvents, setSelectedEvents] = useState(new Set());
   const [currentEvent, setCurrentEvent] = useState({
     id: null,
     title: "",
@@ -155,6 +159,43 @@ const Dashboard = () => {
       console.error("Error saving events to localStorage:", error);
     }
   }, [events]);
+  
+  // Listen for storage changes from other tabs
+  useEffect(() => {
+    const handleStorageChange = (event) => {
+      const storageKey = getEventsStorageKey();
+      if (event.storageArea === localStorage && event.key === storageKey) {
+        console.log("Detected storage change from another tab...");
+        try {
+          if (event.newValue) {
+            const parsedEvents = JSON.parse(event.newValue).map(ev => ({
+              ...ev,
+              start: new Date(ev.start),
+              end: new Date(ev.end)
+            }));
+            setEvents(parsedEvents);
+            console.log("Events updated from storage change:", parsedEvents);
+          } else {
+            // Handle case where events might be cleared
+            setEvents([]);
+            console.log("Events cleared due to storage change.");
+          }
+        } catch (error) {
+          console.error("Error processing storage change event:", error);
+          // Optionally keep old state or set to empty
+          // setEvents([]); 
+        }
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+
+    // Cleanup listener on component unmount
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+    // Rerun this effect if the storage key calculation changes (e.g., user logs out/in)
+  }, [getEventsStorageKey]); 
   
   // Format the current time
   const formatTime = (date) => {
@@ -458,6 +499,36 @@ const Dashboard = () => {
     }
   };
   
+  // Handle multiple event selection
+  const handleEventSelection = (event, eventId) => {
+    event.stopPropagation(); // Prevent opening edit modal
+    setSelectedEvents(prev => {
+      const newSelection = new Set(prev);
+      if (newSelection.has(eventId)) {
+        newSelection.delete(eventId);
+      } else {
+        newSelection.add(eventId);
+      }
+      return newSelection;
+    });
+  };
+
+  // Delete multiple events
+  const handleDeleteMultipleEvents = () => {
+    if (selectedEvents.size === 0) return;
+
+    const confirmDelete = window.confirm(
+      `Are you sure you want to delete ${selectedEvents.size} event${selectedEvents.size > 1 ? 's' : ''}?`
+    );
+
+    if (confirmDelete) {
+      setEvents(prevEvents => 
+        prevEvents.filter(event => !selectedEvents.has(event.id))
+      );
+      setSelectedEvents(new Set());
+    }
+  };
+  
   return (
     <div className="dashboard-container">
       <div className="dashboard-header">
@@ -481,9 +552,14 @@ const Dashboard = () => {
             <button className="calendar-today-btn" onClick={() => setSelectedDate(new Date())}>
               {selectedDate instanceof Date ? selectedDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }) : "Today"}
             </button>
-            <button className="calendar-toggle-btn" onClick={() => setShowCalendarModal(true)}>
-              Open Calendar
-            </button>
+            <div className="calendar-buttons">
+              <button className="calendar-toggle-btn" onClick={() => setShowCalendarModal(true)}>
+                Open Calendar
+              </button>
+              <button className="calendar-toggle-btn view-all" onClick={() => setShowAllEventsModal(true)}>
+                View All Events
+              </button>
+            </div>
           </div>
           
           <div className="selected-date-events">
@@ -499,12 +575,12 @@ const Dashboard = () => {
                     <h4>{event.title}</h4>
                     <p className="event-time">
                       {event.start instanceof Date 
-                        ? event.start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
-                        : new Date(event.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                        ? event.start.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) 
+                        : new Date(event.start).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
                       } - 
                       {event.end instanceof Date 
-                        ? event.end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
-                        : new Date(event.end).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                        ? event.end.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) 
+                        : new Date(event.end).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
                       }
                     </p>
                     <p className="event-description">{event.description}</p>
@@ -663,6 +739,119 @@ const Dashboard = () => {
         </div>
       )}
       
+      {/* All Events Modal */}
+      <Modal isOpen={showAllEventsModal} onClose={() => setShowAllEventsModal(false)} size="large">
+        <div className="all-events-modal">
+          <div className="all-events-header">
+            <h2>All Events</h2>
+            <div className="all-events-actions">
+              {selectedEvents.size > 0 && (
+                <div className="selection-info">
+                  <span>{selectedEvents.size} selected</span>
+                  <button 
+                    className="clear-selection-btn"
+                    onClick={() => setSelectedEvents(new Set())}
+                  >
+                    Clear
+                  </button>
+                </div>
+              )}
+              <button 
+                className="add-event-btn"
+                onClick={handleAddEvent}
+              >
+                + New Event
+              </button>
+              {selectedEvents.size > 0 && (
+                <button 
+                  className="delete-multiple-btn"
+                  onClick={handleDeleteMultipleEvents}
+                >
+                  Delete Selected
+                </button>
+              )}
+            </div>
+          </div>
+          
+          <div className="events-filter-bar">
+            <div className="filter-group">
+              <button className={`filter-btn all active`}>All</button>
+              <button className={`filter-btn workout`}>Workouts</button>
+              <button className={`filter-btn nutrition`}>Nutrition</button>
+              <button className={`filter-btn rest`}>Rest</button>
+            </div>
+            <div className="search-box">
+              <input 
+                type="text" 
+                placeholder="Search events..."
+                className="event-search-input"
+              />
+            </div>
+          </div>
+
+          <div className="all-events-list">
+            {events.length > 0 ? (
+              events.sort((a, b) => new Date(a.start) - new Date(b.start)).map(event => (
+                <div 
+                  key={event.id} 
+                  className={`event-item event-type-${event.type} ${selectedEvents.has(event.id) ? 'selected' : ''}`}
+                  onClick={() => handleEditEvent(event)}
+                >
+                  <div className="event-select">
+                    <input
+                      type="checkbox"
+                      checked={selectedEvents.has(event.id)}
+                      onChange={(e) => handleEventSelection(e, event.id)}
+                    />
+                  </div>
+                  <div className="event-content">
+                    <div className="event-header">
+                      <div className="event-date-time">
+                        <div className="event-date">
+                          {new Date(event.start).toLocaleDateString('en-US', { 
+                            month: 'short', 
+                            day: 'numeric', 
+                            year: 'numeric' 
+                          })}
+                        </div>
+                        <div className="event-time">
+                          {event.start instanceof Date 
+                            ? event.start.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) 
+                            : new Date(event.start).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
+                          } - 
+                          {event.end instanceof Date 
+                            ? event.end.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) 
+                            : new Date(event.end).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
+                          }
+                        </div>
+                      </div>
+                      <div className="event-type-badge">{event.type}</div>
+                    </div>
+                    <h4>{event.title}</h4>
+                    <p className="event-description">{event.description}</p>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="no-events-message">
+                <div className="empty-state">
+                  <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                  </svg>
+                  <p>No events scheduled</p>
+                  <button className="add-event-btn secondary" onClick={handleAddEvent}>
+                    Schedule your first event
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </Modal>
+      
       <div className="dashboard-cards">
         <div className="dashboard-card">
           <h3>Your Profile</h3>
@@ -684,6 +873,7 @@ const Dashboard = () => {
       </div>
     </div>
   );
-};
+}
 
+// Export the Dashboard component as default
 export default Dashboard;

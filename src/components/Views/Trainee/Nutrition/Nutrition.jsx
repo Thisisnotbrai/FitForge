@@ -691,7 +691,10 @@ const Nutrition = () => {
   
   // Format date for display
   const formatDate = (dateString) => {
-    const date = new Date(dateString);
+    // Create a date object with the date string and ensure proper timezone handling
+    // This fixes potential timezone offset issues by creating a date object with the date parts
+    const [year, month, day] = dateString.split('-').map(Number);
+    const date = new Date(year, month - 1, day); // month is 0-indexed in JS Date
     return date.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
   };
   

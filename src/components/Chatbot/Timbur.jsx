@@ -12,6 +12,7 @@ const Timbur = ({ onClose }) => {
   const [isTyping, setIsTyping] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const messagesEndRef = useRef(null);
+  const user = JSON.parse(localStorage.getItem('user'));
 
   // Load chat history on component mount
   useEffect(() => {
@@ -134,7 +135,7 @@ const Timbur = ({ onClose }) => {
             aria-label="Close chat"
           >
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <path d="M12 4L4 12M4 4L12 12" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+              <path d="M12 4L4 12M4 4L12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
             </svg>
           </button>
         </div>
@@ -194,9 +195,9 @@ const Timbur = ({ onClose }) => {
           disabled={!inputValue.trim()}
           aria-label="Send message"
         >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-            <circle cx="12" cy="12" r="11" stroke="#e74c3c" strokeWidth="2"/>
-            <path d="M8 12L16 12M16 12L12 8M16 12L12 16" stroke="#e74c3c" strokeWidth="2" strokeLinecap="round"/>
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M22 2L11 13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
         </button>
       </form>

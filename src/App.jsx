@@ -7,7 +7,7 @@ import FAQ from "./components/LandingPage/FAQ";
 import Features from "./components/LandingPage/Features";
 import Footer from "./components/LandingPage/Footer";
 import BackToTopButton from "./components/LandingPage/BackToTopButton";
-import Dashboard from "./components/Views/Trainee/Dashboard";
+import Dashboard from "./components/Views/Trainee/Dashboard.jsx";
 import TrainerDashboard from "./components/Views/Trainer/TrainerDashboard"; // Import the TrainerDashboard
 import UserProfile from "./components/Views/Trainee/UserProfile"; // Import the UserProfile component
 import ProtectedRoute from "./components/Views/ProtectedRoute";
