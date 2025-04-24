@@ -1,6 +1,5 @@
 // components/Views/Trainee/Dashboard.jsx
-import { Link } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import "./Dashboard.css";
 import Modal from "../../../components/Modal";
 // When packages are installed, uncomment these imports:
@@ -54,10 +53,10 @@ function Dashboard() {
   };
   
   // Helper function to get events storage key for the user
-  const getEventsStorageKey = () => {
+  const getEventsStorageKey = useCallback(() => {
     const userEmail = getCurrentUserEmail();
     return userEmail ? `fitnessEvents_${userEmail}` : null;
-  };
+  }, []);
   
   // Helper function to safely serialize dates for storage
   const serializeEventsForStorage = (eventsArray) => {
@@ -139,7 +138,7 @@ function Dashboard() {
       console.error("Error in loading events:", error);
       setEvents([]);
     }
-  }, []);
+  }, [getEventsStorageKey]);
   
   // Save events to localStorage whenever they change
   useEffect(() => {
@@ -158,7 +157,7 @@ function Dashboard() {
     } catch (error) {
       console.error("Error saving events to localStorage:", error);
     }
-  }, [events]);
+  }, [events, getEventsStorageKey]);
   
   // Listen for storage changes from other tabs
   useEffect(() => {
@@ -738,140 +737,7 @@ function Dashboard() {
           </div>
         </div>
       )}
-      
-      {/* All Events Modal */}
-      <Modal isOpen={showAllEventsModal} onClose={() => setShowAllEventsModal(false)} size="large">
-        <div className="all-events-modal">
-          <div className="all-events-header">
-            <h2>All Events</h2>
-            <div className="all-events-actions">
-              {selectedEvents.size > 0 && (
-                <div className="selection-info">
-                  <span>{selectedEvents.size} selected</span>
-                  <button 
-                    className="clear-selection-btn"
-                    onClick={() => setSelectedEvents(new Set())}
-                  >
-                    Clear
-                  </button>
-                </div>
-              )}
-              <button 
-                className="add-event-btn"
-                onClick={handleAddEvent}
-              >
-                + New Event
-              </button>
-              {selectedEvents.size > 0 && (
-                <button 
-                  className="delete-multiple-btn"
-                  onClick={handleDeleteMultipleEvents}
-                >
-                  Delete Selected
-                </button>
-              )}
-            </div>
-          </div>
-          
-          <div className="events-filter-bar">
-            <div className="filter-group">
-              <button className={`filter-btn all active`}>All</button>
-              <button className={`filter-btn workout`}>Workouts</button>
-              <button className={`filter-btn nutrition`}>Nutrition</button>
-              <button className={`filter-btn rest`}>Rest</button>
-            </div>
-            <div className="search-box">
-              <input 
-                type="text" 
-                placeholder="Search events..."
-                className="event-search-input"
-              />
-            </div>
-          </div>
-
-          <div className="all-events-list">
-            {events.length > 0 ? (
-              events.sort((a, b) => new Date(a.start) - new Date(b.start)).map(event => (
-                <div 
-                  key={event.id} 
-                  className={`event-item event-type-${event.type} ${selectedEvents.has(event.id) ? 'selected' : ''}`}
-                  onClick={() => handleEditEvent(event)}
-                >
-                  <div className="event-select">
-                    <input
-                      type="checkbox"
-                      checked={selectedEvents.has(event.id)}
-                      onChange={(e) => handleEventSelection(e, event.id)}
-                    />
-                  </div>
-                  <div className="event-content">
-                    <div className="event-header">
-                      <div className="event-date-time">
-                        <div className="event-date">
-                          {new Date(event.start).toLocaleDateString('en-US', { 
-                            month: 'short', 
-                            day: 'numeric', 
-                            year: 'numeric' 
-                          })}
-                        </div>
-                        <div className="event-time">
-                          {event.start instanceof Date 
-                            ? event.start.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) 
-                            : new Date(event.start).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
-                          } - 
-                          {event.end instanceof Date 
-                            ? event.end.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) 
-                            : new Date(event.end).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
-                          }
-                        </div>
-                      </div>
-                      <div className="event-type-badge">{event.type}</div>
-                    </div>
-                    <h4>{event.title}</h4>
-                    <p className="event-description">{event.description}</p>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className="no-events-message">
-                <div className="empty-state">
-                  <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                    <line x1="16" y1="2" x2="16" y2="6"></line>
-                    <line x1="8" y1="2" x2="8" y2="6"></line>
-                    <line x1="3" y1="10" x2="21" y2="10"></line>
-                  </svg>
-                  <p>No events scheduled</p>
-                  <button className="add-event-btn secondary" onClick={handleAddEvent}>
-                    Schedule your first event
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      </Modal>
-      
-      <div className="dashboard-cards">
-        <div className="dashboard-card">
-          <h3>Your Profile</h3>
-          <p>View and edit your personal information</p>
-          <Link to="/profile" className="dashboard-link">Go to Profile</Link>
-        </div>
-        
-        <div className="dashboard-card">
-          <h3>Workouts</h3>
-          <p>Access your workout plans and exercises</p>
-          <Link to="/workout" className="dashboard-link">View Workouts</Link>
-        </div>
-        
-        <div className="dashboard-card">
-          <h3>Progress</h3>
-          <p>Track your fitness achievements and goals</p>
-          <Link to="/progress" className="dashboard-link">Check Progress</Link>
-        </div>
       </div>
-    </div>
   );
 }
 

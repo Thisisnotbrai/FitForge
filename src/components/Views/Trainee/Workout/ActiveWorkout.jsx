@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import ExerciseScreen from "./ExerciseScreen";
 import RestTimer from "./RestTimer";
+import CustomRestTimer from "./CustomRestTimer";
 import WorkoutComplete from "./WorkoutComplete";
 import "./Workout.css";
 import "./ActiveWorkout.css";
@@ -12,24 +13,86 @@ const ActiveWorkout = () => {
   const navigate = useNavigate();
   const [workout, setWorkout] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [currentExerciseIndex, setCurrentExerciseIndex] = useState(0);
   const [isResting, setIsResting] = useState(false);
   const [restTime, setRestTime] = useState(0);
   const [workoutComplete, setWorkoutComplete] = useState(false);
   const [workoutStartTime, setWorkoutStartTime] = useState(null);
   const [workoutDuration, setWorkoutDuration] = useState(0);
+  const [isUserWorkout, setIsUserWorkout] = useState(false);
 
   useEffect(() => {
     const fetchWorkoutDetails = async () => {
       try {
-        const response = await axios.get(
-          `http://localhost:3000/workouts/workouts/${id}`
-        );
-        setWorkout(response.data);
-        setLoading(false);
-        setWorkoutStartTime(new Date());
+        setLoading(true);
+        setError(null);
+        
+        // Try to find the workout in different sources
+        const token = localStorage.getItem('token');
+        let workoutData = null;
+        
+        // First try as a trainee workout if user is logged in
+        if (token) {
+          try {
+            const traineeResponse = await axios.get(
+              `http://localhost:3000/trainee/workouts/${id}`,
+              {
+                headers: {
+                  'Authorization': `Bearer ${token}`
+                }
+              }
+            );
+            
+            if (traineeResponse.data && traineeResponse.data.success) {
+              workoutData = traineeResponse.data.data;
+              setIsUserWorkout(true);
+              console.log("Found trainee workout:", workoutData);
+            }
+          } catch (err) {
+            console.log("Not a trainee workout or not authorized:", err.message);
+            // Continue to try regular workout
+          }
+        }
+        
+        // If not found as trainee workout, try regular workout
+        if (!workoutData) {
+          try {
+            const regularResponse = await axios.get(
+              `http://localhost:3000/workouts/workouts/${id}`
+            );
+            
+            if (regularResponse.data) {
+              workoutData = regularResponse.data;
+              setIsUserWorkout(false);
+              console.log("Found regular workout:", workoutData);
+            }
+          } catch (err) {
+            console.error("Error fetching regular workout:", err);
+            setError("Workout not found");
+          }
+        }
+        
+        if (workoutData) {
+          // Ensure exercises is an array
+          if (!workoutData.exercises) {
+            workoutData.exercises = [];
+          }
+          
+          // Check if the workout has any exercises
+          if (workoutData.exercises.length === 0) {
+            setError("This workout doesn't have any exercises. Please add exercises before starting the workout.");
+          } else {
+            setWorkout(workoutData);
+            setWorkoutStartTime(new Date());
+          }
+        } else {
+          setError("Unable to find workout");
+        }
       } catch (error) {
         console.error("Error fetching workout details:", error);
+        setError("Failed to load workout");
+      } finally {
         setLoading(false);
       }
     };
@@ -50,6 +113,11 @@ const ActiveWorkout = () => {
   }, [workoutStartTime, workoutComplete]);
 
   const handleExerciseComplete = () => {
+    if (!workout || !workout.exercises || workout.exercises.length === 0) {
+      setError("No exercises found in this workout");
+      return;
+    }
+
     const nextExerciseIndex = currentExerciseIndex + 1;
 
     if (nextExerciseIndex < workout.exercises.length) {
@@ -66,15 +134,26 @@ const ActiveWorkout = () => {
 
       // Record workout completed if needed
       try {
-        axios
-          .post("http://localhost:3000/workouts/workout-history", {
+        const token = localStorage.getItem('token');
+        
+        if (token) {
+          // Different endpoints for user workouts vs. featured workouts
+          const endpoint = isUserWorkout
+            ? "http://localhost:3000/trainee/workout-history"
+            : "http://localhost:3000/workouts/workout-history";
+          
+          axios.post(endpoint, {
             workoutId: workout.id,
             completionTime: minutes || workoutDuration, // Use tracked duration as fallback
             date: new Date().toISOString(),
-          })
-          .catch((error) =>
+          }, {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          }).catch((error) =>
             console.error("Error saving workout history:", error)
           );
+        }
       } catch (error) {
         console.error("Error saving workout history:", error);
       }
@@ -96,8 +175,42 @@ const ActiveWorkout = () => {
     return <div className="loading-container">Loading workout...</div>;
   }
 
+  if (error) {
+    return (
+      <div className="error-container">
+        <div className="error-message">{error}</div>
+        <button onClick={() => navigate(-1)} className="btn-go-back">
+          Go Back
+        </button>
+      </div>
+    );
+  }
+
   if (!workout) {
-    return <div className="error-container">Workout not found</div>;
+    return (
+      <div className="error-container">
+        <div className="error-message">Workout not found</div>
+        <button onClick={() => navigate(-1)} className="btn-go-back">
+          Go Back
+        </button>
+      </div>
+    );
+  }
+
+  if (!workout.exercises || workout.exercises.length === 0) {
+    return (
+      <div className="error-container">
+        <div className="error-message">
+          This workout doesn&apos;t have any exercises. Please add exercises before starting.
+        </div>
+        <button 
+          onClick={() => navigate(`/workout/${id}`)} 
+          className="btn-go-back"
+        >
+          Go to Workout Details
+        </button>
+      </div>
+    );
   }
 
   if (workoutComplete) {
@@ -112,11 +225,38 @@ const ActiveWorkout = () => {
     );
   }
 
+  // Guard against invalid current exercise index
+  if (currentExerciseIndex >= workout.exercises.length) {
+    setCurrentExerciseIndex(0);
+    return <div className="loading-container">Adjusting workout progress...</div>;
+  }
+
   const currentExercise = workout.exercises[currentExerciseIndex];
+  
+  // Additional safety check for currentExercise
+  if (!currentExercise) {
+    return (
+      <div className="error-container">
+        <div className="error-message">
+          There was a problem with the current exercise. Please try again.
+        </div>
+        <button onClick={() => navigate(-1)} className="btn-go-back">
+          Go Back
+        </button>
+      </div>
+    );
+  }
+  
   const progress = (
     (currentExerciseIndex / workout.exercises.length) *
     100
   ).toFixed(0);
+
+  // Check if we have a next exercise (for rest timer)
+  const hasNextExercise = currentExerciseIndex + 1 < workout.exercises.length;
+  const nextExerciseName = hasNextExercise 
+    ? workout.exercises[currentExerciseIndex + 1].exercise_name 
+    : "";
 
   return (
     <div className="active-workout-container">
@@ -138,13 +278,18 @@ const ActiveWorkout = () => {
       </div>
 
       {isResting ? (
-        <RestTimer
-          seconds={restTime}
-          nextExercise={
-            workout.exercises[currentExerciseIndex + 1].exercise_name
-          }
-          onComplete={handleRestComplete}
-        />
+        hasNextExercise ? (
+          <RestTimer
+            seconds={restTime}
+            nextExercise={nextExerciseName}
+            onComplete={handleRestComplete}
+          />
+        ) : (
+          <CustomRestTimer
+            seconds={restTime}
+            onComplete={handleRestComplete}
+          />
+        )
       ) : (
         <ExerciseScreen
           exercise={currentExercise}
