@@ -105,12 +105,6 @@ const Workout = () => {
                     </span>
                     <span className="stat-label">calories</span>
                   </div>
-                  <div className="stat">
-                    <span className="stat-value">
-                      {workout.exercises?.length || 0}
-                    </span>
-                    <span className="stat-label">exercises</span>
-                  </div>
                 </div>
                 <Link to={`/workout/${workout.id}`} className="btn-primary">
                   View Details

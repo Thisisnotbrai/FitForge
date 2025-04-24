@@ -23,9 +23,9 @@ module.exports = (sequelize, DataTypes) => {
       },
     },
     user_role: {
-      type: DataTypes.ENUM('trainee', 'trainer', 'admin'),
+      type: DataTypes.ENUM("trainee", "trainer", "admin"),
       allowNull: false,
-      defaultValue: 'trainee',
+      defaultValue: "trainee",
     },
     verification_code: {
       type: DataTypes.INTEGER,
@@ -40,8 +40,15 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.BOOLEAN,
       allowNull: false,
       defaultValue: false, // Trainers are not approved by default
-    }
+    },
   });
+
+  User.associate = function (models) {
+    User.hasOne(models.TrainerInfo, {
+      foreignKey: "id",
+      as: "trainerInfo",
+    });
+  };
 
   return User;
 };

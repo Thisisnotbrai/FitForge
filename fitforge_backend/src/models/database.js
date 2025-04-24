@@ -22,6 +22,7 @@ const db = {};
 db.Sequelize = Sequelize;
 db.sequelize = sequelize;
 
+db.TrainerInfo = require("../models/TrainerInfo")(sequelize, DataTypes);
 db.User = require("../models/User")(sequelize, DataTypes);
 db.Exercise = require("../models/exercise")(sequelize, DataTypes);
 db.Workouts = require("../models/Workouts")(sequelize, DataTypes);

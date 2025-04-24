@@ -17,7 +17,6 @@ const transporter = nodemailer.createTransport({
 });
 
 const verificationEmail = async (email, token) => {
-
   try {
     await transporter.sendMail({
       from: '"Fit Forge" <fit.forge.app.gc@gmail.com>',
@@ -25,15 +24,13 @@ const verificationEmail = async (email, token) => {
       subject: "Email Verification",
       text: "Please verify your email address",
       html: `<p>Please verify your email address by clicking the link below: ${token}</p>`,
-      
-
     });
     return true;
   } catch (error) {
     console.log(error);
     return false;
   }
-}
+};
 
 exports.userLogin = async (req, res) => {
   try {
@@ -80,7 +77,8 @@ exports.userLogin = async (req, res) => {
 
 exports.registerUser = async (req, res) => {
   try {
-    const { user_name, user_email, user_password, user_role, admin_secret } = req.body;
+    const { user_name, user_email, user_password, user_role, admin_secret } =
+      req.body;
 
     const existingUser = await User.findOne({ where: { user_email } });
     if (existingUser) {
@@ -93,7 +91,12 @@ exports.registerUser = async (req, res) => {
 
     // Restrict admin account creation
     if (user_role === "admin" && admin_secret !== process.env.ADMIN_SECRET) {
-      return send.sendResponseMessage(res, 403, null, "Unauthorized to create an admin");
+      return send.sendResponseMessage(
+        res,
+        403,
+        null,
+        "Unauthorized to create an admin"
+      );
     }
 
     const hash = await argon2.hash(user_password);
@@ -110,17 +113,20 @@ exports.registerUser = async (req, res) => {
       user_password: hash,
       user_role,
       verification_code: verificationcode,
-      is_verified: user_role === "admin" ? true : false,  // Admins are verified by default
+      is_verified: user_role === "admin" ? true : false, // Admins are verified by default
       is_approved: user_role === "trainer" ? false : true,
     });
 
-    return send.sendResponseMessage(res, 201, newUser, "User registered successfully");
+    return send.sendResponseMessage(
+      res,
+      201,
+      newUser,
+      "User registered successfully"
+    );
   } catch (error) {
     return send.sendErrorMessage(res, 500, error);
   }
 };
-
-
 
 exports.verifyEmail = async (req, res) => {
   try {
@@ -133,18 +139,25 @@ exports.verifyEmail = async (req, res) => {
       return send.sendResponseMessage(res, 400, null, "Email already verified");
     }
     if (existingUser.verification_code != verification_code) {
-      return send.sendResponseMessage(res, 400, null, "Invalid verification code");
+      return send.sendResponseMessage(
+        res,
+        400,
+        null,
+        "Invalid verification code"
+      );
     }
     existingUser.is_verified = true;
     await existingUser.save();
-    return send.sendResponseMessage(res, 200, null, "Email verified successfully");
+    return send.sendResponseMessage(
+      res,
+      200,
+      null,
+      "Email verified successfully"
+    );
   } catch (error) {
     return send.sendErrorMessage(res, 500, error);
   }
-
-
-}
-
+};
 
 exports.getPendingTrainers = async (req, res) => {
   try {
@@ -157,34 +170,55 @@ exports.getPendingTrainers = async (req, res) => {
     });
 
     if (pendingTrainers.length === 0) {
-      return send.sendResponseMessage(res, 404, null, "No pending trainers found.");
+      return send.sendResponseMessage(
+        res,
+        404,
+        null,
+        "No pending trainers found."
+      );
     }
 
-    return send.sendResponseMessage(res, 200, pendingTrainers, "Pending trainers retrieved successfully.");
+    return send.sendResponseMessage(
+      res,
+      200,
+      pendingTrainers,
+      "Pending trainers retrieved successfully."
+    );
   } catch (error) {
     return send.sendErrorMessage(res, 500, error);
   }
 };
 
-
 exports.approveTrainer = async (req, res) => {
   try {
     const { trainerId } = req.params;
-    
-    const trainer = await User.findOne({ where: { id: trainerId, user_role: "trainer" } });
+
+    const trainer = await User.findOne({
+      where: { id: trainerId, user_role: "trainer" },
+    });
 
     if (!trainer) {
       return send.sendResponseMessage(res, 404, null, "Trainer not found");
     }
 
     if (trainer.is_approved) {
-      return send.sendResponseMessage(res, 400, null, "Trainer is already approved");
+      return send.sendResponseMessage(
+        res,
+        400,
+        null,
+        "Trainer is already approved"
+      );
     }
 
     trainer.is_approved = true;
     await trainer.save();
 
-    return send.sendResponseMessage(res, 200, trainer, "Trainer approved successfully");
+    return send.sendResponseMessage(
+      res,
+      200,
+      trainer,
+      "Trainer approved successfully"
+    );
   } catch (error) {
     return send.sendErrorMessage(res, 500, error);
   }
@@ -197,10 +231,22 @@ exports.getTrainers = async (req, res) => {
         user_role: "trainer",
         is_approved: true, // Only fetch approved trainers
       },
-      attributes: ["id", "user_name", "user_email", "user_role", "is_verified", "is_approved"],
+      attributes: [
+        "id",
+        "user_name",
+        "user_email",
+        "user_role",
+        "is_verified",
+        "is_approved",
+      ],
     });
 
-    return send.sendResponseMessage(res, 200, trainers, "Trainers retrieved successfully.");
+    return send.sendResponseMessage(
+      res,
+      200,
+      trainers,
+      "Trainers retrieved successfully."
+    );
   } catch (error) {
     return send.sendErrorMessage(res, 500, error);
   }
@@ -215,7 +261,12 @@ exports.getTrainees = async (req, res) => {
       attributes: ["id", "user_name", "user_email", "user_role", "is_verified"],
     });
 
-    return send.sendResponseMessage(res, 200, trainees, "Trainees retrieved successfully.");
+    return send.sendResponseMessage(
+      res,
+      200,
+      trainees,
+      "Trainees retrieved successfully."
+    );
   } catch (error) {
     return send.sendErrorMessage(res, 500, error);
   }
