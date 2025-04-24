@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './Timbur.css';
 import { processMessage } from '../../services/chatbotService';
+import ChatHistory from '../ChatHistory';
 
 // Import Timburr image
 const timburImage = "https://img.pokemondb.net/sprites/black-white/anim/normal/timburr.gif";
@@ -9,6 +10,7 @@ const Timbur = ({ onClose }) => {
   const [messages, setMessages] = useState([]);
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
   const messagesEndRef = useRef(null);
 
   // Load chat history on component mount
@@ -100,61 +102,82 @@ const Timbur = ({ onClose }) => {
     localStorage.setItem('chatHistory', JSON.stringify([welcomeMessage]));
   };
 
+  const toggleHistory = () => {
+    setShowHistory(!showHistory);
+  };
+
   return (
     <div className="timbur-container">
       <div className="timbur-header">
-        <div className="avatar">
-          <img src={timburImage} alt="Timburr" className="avatar-image" />
+        <div className="header-left">
+          <div className="avatar">
+            <img src={timburImage} alt="Timburr" className="avatar-image" />
+          </div>
+          <div className="header-text">
+            <h2>Timburr</h2>
+            <p className="status">Online</p>
+          </div>
         </div>
-        <div className="header-text">
-          <h2>Timburr</h2>
-          <p className="status">Online</p>
+        <div className="header-right">
+          <button 
+            className="history-toggle-button" 
+            onClick={toggleHistory}
+            aria-label="Toggle history"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" strokeWidth="2" strokeLinecap="round"/>
+            </svg>
+          </button>
+          <button 
+            className="timbur-close-button" 
+            onClick={onClose}
+            aria-label="Close chat"
+          >
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path d="M12 4L4 12M4 4L12 12" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+            </svg>
+          </button>
         </div>
-        <button 
-          className="timbur-close-button" 
-          onClick={onClose}
-          aria-label="Close chat"
-        >
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-            <path d="M12 4L4 12M4 4L12 12" stroke="white" strokeWidth="2" strokeLinecap="round"/>
-          </svg>
-        </button>
       </div>
 
-      <div className="timbur-messages">
-        {messages.map((message, index) => (
-          <div 
-            key={index} 
-            className={`message-wrapper ${message.type}-wrapper`}
-          >
-            {message.type === 'bot' && (
+      <div className="timbur-content">
+        {showHistory && <ChatHistory />}
+        
+        <div className="timbur-messages">
+          {messages.map((message, index) => (
+            <div 
+              key={index} 
+              className={`message-wrapper ${message.type}-wrapper`}
+            >
+              {message.type === 'bot' && (
+                <div className="message-icon">
+                  <img src={timburImage} alt="Timburr" className="message-avatar" />
+                </div>
+              )}
+              <div className="message-content">
+                <div className={`message ${message.type}`}>
+                  <p>{message.text}</p>
+                </div>
+                <span className="message-time">
+                  {formatTimestamp(message.timestamp)}
+                </span>
+              </div>
+            </div>
+          ))}
+          {isTyping && (
+            <div className="message-wrapper bot-wrapper">
               <div className="message-icon">
                 <img src={timburImage} alt="Timburr" className="message-avatar" />
               </div>
-            )}
-            <div className="message-content">
-              <div className={`message ${message.type}`}>
-                <p>{message.text}</p>
+              <div className="message typing">
+                <div className="dot"></div>
+                <div className="dot"></div>
+                <div className="dot"></div>
               </div>
-              <span className="message-time">
-                {formatTimestamp(message.timestamp)}
-              </span>
             </div>
-          </div>
-        ))}
-        {isTyping && (
-          <div className="message-wrapper bot-wrapper">
-            <div className="message-icon">
-              <img src={timburImage} alt="Timburr" className="message-avatar" />
-            </div>
-            <div className="message typing">
-              <div className="dot"></div>
-              <div className="dot"></div>
-              <div className="dot"></div>
-            </div>
-          </div>
-        )}
-        <div ref={messagesEndRef} />
+          )}
+          <div ref={messagesEndRef} />
+        </div>
       </div>
 
       <form onSubmit={handleSubmit} className="timbur-input-area">
