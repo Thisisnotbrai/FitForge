@@ -179,3 +179,76 @@
     font-size: 1.4rem;
   }
 }
+
+/* Styles for custom workout timers */
+.custom-timer-container {
+  background-color: white;
+  border-radius: 12px;
+  padding: 2rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.custom-timer-display {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #3498db;
+  margin: 1.5rem 0;
+}
+
+.custom-timer-controls {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.custom-timer-btn {
+  background-color: #3498db;
+  color: white;
+  border: none;
+  padding: 0.8rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 100px;
+}
+
+.custom-timer-btn:hover {
+  background-color: #2980b9;
+  transform: translateY(-2px);
+}
+
+.custom-timer-btn.reset {
+  background-color: #e74c3c;
+}
+
+.custom-timer-btn.reset:hover {
+  background-color: #c0392b;
+}
+
+/* Added indicators for user-created workouts */
+.user-workout-indicator {
+  background-color: rgba(39, 174, 96, 0.1);
+  color: #27ae60;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  display: inline-block;
+  margin-bottom: 1rem;
+  font-weight: 600;
+  border-left: 3px solid #27ae60;
+}
+
+/* Exercise counter badge */
+.exercise-counter {
+  display: inline-block;
+  background-color: #3498db;
+  color: white;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0.3rem 0.6rem;
+  border-radius: 30px;
+  margin-left: 0.8rem;
+}

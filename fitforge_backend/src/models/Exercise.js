@@ -12,27 +12,32 @@ module.exports = (sequelize, DataTypes) => {
     sets: {
       type: DataTypes.INTEGER,
       allowNull: false,
+      defaultValue: 3
     },
     reps: {
-      type: DataTypes.STRING,
+      type: DataTypes.INTEGER,
       allowNull: false,
+      defaultValue: 10
     },
     work_time: {
       type: DataTypes.INTEGER,
       allowNull: false,
+      defaultValue: 45
     },
     rest_time: {
       type: DataTypes.INTEGER,
       allowNull: false,
+      defaultValue: 15
     },
     rest_between: {
       type: DataTypes.INTEGER,
       allowNull: false,
+      defaultValue: 60
     },
-
     exercise_order: {
       type: DataTypes.INTEGER,
       allowNull: false,
+      defaultValue: 1
     },
   });
 

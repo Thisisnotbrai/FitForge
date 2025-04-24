@@ -1,6 +1,5 @@
 // components/Views/Trainee/Dashboard.jsx
-import { Link } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import "./Dashboard.css";
 // When packages are installed, uncomment these imports:
 // import { Calendar, momentLocalizer } from 'react-big-calendar';
@@ -50,10 +49,10 @@ const Dashboard = () => {
   };
   
   // Helper function to get events storage key for the user
-  const getEventsStorageKey = () => {
+  const getEventsStorageKey = useCallback(() => {
     const userEmail = getCurrentUserEmail();
     return userEmail ? `fitnessEvents_${userEmail}` : null;
-  };
+  }, []);
   
   // Helper function to safely serialize dates for storage
   const serializeEventsForStorage = (eventsArray) => {
@@ -135,7 +134,7 @@ const Dashboard = () => {
       console.error("Error in loading events:", error);
       setEvents([]);
     }
-  }, []);
+  }, [getEventsStorageKey]);
   
   // Save events to localStorage whenever they change
   useEffect(() => {
@@ -154,7 +153,7 @@ const Dashboard = () => {
     } catch (error) {
       console.error("Error saving events to localStorage:", error);
     }
-  }, [events]);
+  }, [events, getEventsStorageKey]);
   
   // Format the current time
   const formatTime = (date) => {
@@ -662,27 +661,7 @@ const Dashboard = () => {
           </div>
         </div>
       )}
-      
-      <div className="dashboard-cards">
-        <div className="dashboard-card">
-          <h3>Your Profile</h3>
-          <p>View and edit your personal information</p>
-          <Link to="/profile" className="dashboard-link">Go to Profile</Link>
-        </div>
-        
-        <div className="dashboard-card">
-          <h3>Workouts</h3>
-          <p>Access your workout plans and exercises</p>
-          <Link to="/workout" className="dashboard-link">View Workouts</Link>
-        </div>
-        
-        <div className="dashboard-card">
-          <h3>Progress</h3>
-          <p>Track your fitness achievements and goals</p>
-          <Link to="/progress" className="dashboard-link">Check Progress</Link>
-        </div>
       </div>
-    </div>
   );
 };
 
