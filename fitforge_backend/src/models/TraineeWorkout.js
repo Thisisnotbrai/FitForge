@@ -29,27 +29,28 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: 'Users',
-        key: 'id'
-      }
+        model: "Users",
+        key: "id",
+      },
     },
     is_public: {
       type: DataTypes.BOOLEAN,
-      defaultValue: false
-    }
+      defaultValue: false,
+    },
+    tableName: "traineeworkouts",
   });
 
   TraineeWorkout.associate = (models) => {
     TraineeWorkout.belongsTo(models.User, {
-      foreignKey: 'user_id',
-      as: 'creator'
+      foreignKey: "user_id",
+      as: "creator",
     });
-    
+
     TraineeWorkout.hasMany(models.Exercise, {
-      foreignKey: 'workout_id',
-      as: 'exercises'
+      foreignKey: "workout_id",
+      as: "exercises",
     });
   };
 
   return TraineeWorkout;
-}; 
+};

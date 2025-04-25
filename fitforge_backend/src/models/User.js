@@ -45,7 +45,7 @@ module.exports = (sequelize, DataTypes) => {
 
   User.associate = function (models) {
     User.hasOne(models.TrainerInfo, {
-      foreignKey: "id",
+      foreignKey: "userId",
       as: "trainerInfo",
     });
   };

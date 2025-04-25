@@ -2,6 +2,7 @@
 const express = require("express");
 const router = express.Router();
 const trainerController = require("../controllers/TrainerInfoController");
+const authMiddleware = require("../middlewares/authMiddleware");
 
 // Get all trainers
 router.get("/trainers", trainerController.getAllTrainers);

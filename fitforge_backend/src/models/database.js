@@ -27,17 +27,18 @@ db.User = require("../models/User")(sequelize, DataTypes);
 db.Exercise = require("../models/exercise")(sequelize, DataTypes);
 db.Workouts = require("../models/Workouts")(sequelize, DataTypes);
 db.WorkoutHistory = require("../models/WorkoutHistory")(sequelize, DataTypes);
+db.Bookings = require("../models/Bookings")(sequelize, DataTypes);
 db.TraineeWorkout = require("../models/TraineeWorkout")(sequelize, DataTypes);
 
 // Set up associations
-Object.keys(db).forEach(modelName => {
+Object.keys(db).forEach((modelName) => {
   if (db[modelName].associate) {
     db[modelName].associate(db);
   }
 });
 
 db.sequelize
-  .sync({ alter: true }) // Using alter:true to update the schema
+  .sync({ alter: false }) // Using alter:true to update the schema
   .then(() => console.log("Database synced successfully!"))
   .catch((error) => console.error("error during connection", error));
 

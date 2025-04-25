@@ -4,6 +4,12 @@ module.exports = (sequelize, DataTypes) => {
     workout_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
+      references: {
+        model: "TraineeWorkouts",
+        key: "id",
+      },
+      onDelete: "CASCADE",
+      onUpdate: "CASCADE",
     },
     exercise_name: {
       type: DataTypes.STRING,
@@ -12,34 +18,41 @@ module.exports = (sequelize, DataTypes) => {
     sets: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      defaultValue: 3
+      defaultValue: 3,
     },
     reps: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      defaultValue: 10
+      defaultValue: 10,
     },
     work_time: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      defaultValue: 45
+      defaultValue: 45,
     },
     rest_time: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      defaultValue: 15
+      defaultValue: 15,
     },
     rest_between: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      defaultValue: 60
+      defaultValue: 60,
     },
     exercise_order: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      defaultValue: 1
+      defaultValue: 1,
     },
+    tableName: "exercises",
   });
+  Exercise.associate = (models) => {
+    Exercise.belongsTo(models.TraineeWorkout, {
+      foreignKey: "workout_id",
+      as: "workout",
+    });
+  };
 
   return Exercise;
 };

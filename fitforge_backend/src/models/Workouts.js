@@ -20,6 +20,8 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false,
     },
+
+    tableName: "TraineeWorkouts",
   });
   return Workout;
 };

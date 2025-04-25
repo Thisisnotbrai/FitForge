@@ -81,35 +81,36 @@ exports.addExercise = [
 // Create a new exercise for a workout
 exports.createExercise = async (req, res) => {
   try {
-    const { 
-      exercise_name, 
-      sets, 
-      reps, 
-      work_time, 
-      rest_time, 
+    const {
+      exercise_name,
+      sets,
+      reps,
+      work_time,
+      rest_time,
       rest_between,
-      workout_id 
+      workout_id,
     } = req.body;
 
     // Validate required fields
     if (!exercise_name || !workout_id) {
-      return res.status(400).json({ 
-        success: false, 
-        message: "Exercise name and workout ID are required" 
+      return res.status(400).json({
+        success: false,
+        message: "Exercise name and workout ID are required",
       });
     }
 
     // Get the highest exercise_order for this workout
     const existingExercises = await Exercise.findAll({
       where: { workout_id: workout_id },
-      order: [['exercise_order', 'DESC']],
-      limit: 1
+      order: [["exercise_order", "DESC"]],
+      limit: 1,
     });
-    
+
     // Calculate new exercise order
-    const exercise_order = existingExercises.length > 0 
-      ? existingExercises[0].exercise_order + 1 
-      : 1;
+    const exercise_order =
+      existingExercises.length > 0
+        ? existingExercises[0].exercise_order + 1
+        : 1;
 
     // Create the exercise
     const newExercise = await Exercise.create({
@@ -120,16 +121,16 @@ exports.createExercise = async (req, res) => {
       rest_time: rest_time || 15,
       rest_between: rest_between || 60,
       workout_id,
-      exercise_order
+      exercise_order,
     });
 
     res.status(201).json(newExercise);
   } catch (error) {
     console.error("Error creating exercise:", error);
-    res.status(500).json({ 
-      success: false, 
+    res.status(500).json({
+      success: false,
       message: "Failed to create exercise",
-      error: error.message
+      error: error.message,
     });
   }
 };
@@ -138,22 +139,16 @@ exports.createExercise = async (req, res) => {
 exports.updateExercise = async (req, res) => {
   try {
     const exerciseId = req.params.id;
-    const { 
-      exercise_name, 
-      sets, 
-      reps, 
-      work_time, 
-      rest_time, 
-      rest_between 
-    } = req.body;
+    const { exercise_name, sets, reps, work_time, rest_time, rest_between } =
+      req.body;
 
     // Find the exercise
     const exercise = await Exercise.findByPk(exerciseId);
-    
+
     if (!exercise) {
       return res.status(404).json({
         success: false,
-        message: "Exercise not found"
+        message: "Exercise not found",
       });
     }
 
@@ -164,7 +159,7 @@ exports.updateExercise = async (req, res) => {
       reps: reps || exercise.reps,
       work_time: work_time || exercise.work_time,
       rest_time: rest_time || exercise.rest_time,
-      rest_between: rest_between || exercise.rest_between
+      rest_between: rest_between || exercise.rest_between,
     });
 
     // Return the updated exercise
@@ -174,7 +169,7 @@ exports.updateExercise = async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Failed to update exercise",
-      error: error.message
+      error: error.message,
     });
   }
 };
@@ -183,14 +178,14 @@ exports.updateExercise = async (req, res) => {
 exports.deleteExercise = async (req, res) => {
   try {
     const exerciseId = req.params.id;
-    
+
     // Find the exercise
     const exercise = await Exercise.findByPk(exerciseId);
-    
+
     if (!exercise) {
       return res.status(404).json({
         success: false,
-        message: "Exercise not found"
+        message: "Exercise not found",
       });
     }
 
@@ -200,14 +195,14 @@ exports.deleteExercise = async (req, res) => {
     // Return success message
     res.status(200).json({
       success: true,
-      message: "Exercise deleted successfully"
+      message: "Exercise deleted successfully",
     });
   } catch (error) {
     console.error("Error deleting exercise:", error);
     res.status(500).json({
       success: false,
       message: "Failed to delete exercise",
-      error: error.message
+      error: error.message,
     });
   }
 };
@@ -216,11 +211,11 @@ exports.deleteExercise = async (req, res) => {
 exports.getExercisesByWorkout = async (req, res) => {
   try {
     const workoutId = req.params.workoutId;
-    
+
     // Find all exercises for this workout
     const exercises = await Exercise.findAll({
       where: { workout_id: workoutId },
-      order: [['exercise_order', 'ASC']]
+      order: [["exercise_order", "ASC"]],
     });
 
     res.status(200).json(exercises);
@@ -229,7 +224,7 @@ exports.getExercisesByWorkout = async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Failed to fetch exercises",
-      error: error.message
+      error: error.message,
     });
   }
 };
