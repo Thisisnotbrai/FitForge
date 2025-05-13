@@ -69,7 +69,20 @@ const VerificationTab = () => {
                 if (user.role === "trainee") {
                   navigate("/Dashboard", { replace: true });
                 } else if (user.role === "trainer") {
-                  navigate("/TrainerDashboard", { replace: true });
+                  // Check if the trainer is approved (should be false for new trainers)
+                  if (user.is_approved === true) {
+                    // If already approved, store credentials and redirect to dashboard
+                    localStorage.setItem("token", token);
+                    localStorage.setItem("user", JSON.stringify(user));
+                    navigate("/TrainerDashboard", { replace: true });
+                  } else {
+                    // For trainers awaiting approval, redirect to landing page with modal
+                    localStorage.removeItem("token");
+                    localStorage.removeItem("user");
+                    // Set a flag for the landing page to show a trainer verification modal
+                    localStorage.setItem("showTrainerVerificationModal", "true");
+                    navigate("/", { replace: true });
+                  }
                 }
                 return;
               }
@@ -186,7 +199,20 @@ const VerificationTab = () => {
               if (user.role === "trainee") {
                 navigate("/Dashboard", { replace: true });
               } else if (user.role === "trainer") {
-                navigate("/TrainerDashboard", { replace: true });
+                // Check if the trainer is approved (should be false for new trainers)
+                if (user.is_approved === true) {
+                  // If already approved, store credentials and redirect to dashboard
+                  localStorage.setItem("token", token);
+                  localStorage.setItem("user", JSON.stringify(user));
+                  navigate("/TrainerDashboard", { replace: true });
+                } else {
+                  // For trainers awaiting approval, redirect to landing page with modal
+                  localStorage.removeItem("token");
+                  localStorage.removeItem("user");
+                  // Set a flag for the landing page to show a trainer verification modal
+                  localStorage.setItem("showTrainerVerificationModal", "true");
+                  navigate("/", { replace: true });
+                }
               }
             }
           } catch (loginErr) {

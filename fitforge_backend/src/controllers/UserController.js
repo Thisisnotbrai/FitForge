@@ -63,6 +63,8 @@ exports.userLogin = async (req, res) => {
             name: existingUser.user_name,
             email: existingUser.user_email,
             role: existingUser.user_role,
+            is_verified: existingUser.is_verified,
+            is_approved: existingUser.is_approved,
           },
         },
         "User logged in successfully!"

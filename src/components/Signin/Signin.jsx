@@ -10,6 +10,7 @@ const Signin = () => {
   const [user_password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
+  const [pendingApproval, setPendingApproval] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -28,8 +29,9 @@ const Signin = () => {
     try {
       console.log("Attempting login for:", user_email);
       
-      // Reset any existing errors
+      // Reset any existing errors and messages
       setError("");
+      setPendingApproval(false);
       
       const response = await axios.post("http://localhost:3000/users/login", {
         user_email,
@@ -52,14 +54,19 @@ const Signin = () => {
         console.log("User object from server:", user);
         console.log("Is verified?", user.is_verified);
         
-        // Force-set the token first
-        localStorage.setItem("token", token);
-        localStorage.setItem("user", JSON.stringify(user));
-
         // Check if user is verified - only redirect if explicitly false
         if (user.is_verified === false) {
           // Store email for verification page
           localStorage.setItem("pendingVerificationEmail", user_email);
+          
+          // Set temporary session data for auto-login after verification
+          if (!localStorage.getItem("tempUserData")) {
+            localStorage.setItem("tempUserData", JSON.stringify({
+              email: user_email,
+              password: user_password
+            }));
+          }
+          
           // Navigate to verification page
           navigate("/verify", { state: { email: user_email } });
           return;
@@ -67,11 +74,28 @@ const Signin = () => {
 
         // Check user role and navigate accordingly
         if (user?.role === "trainee") {
+          // Force-set the token and user data for trainee
+          localStorage.setItem("token", token);
+          localStorage.setItem("user", JSON.stringify(user));
           console.log("Navigating to /Dashboard");
           navigate("/Dashboard", { replace: true });
         } else if (user?.role === "trainer") {
-          console.log("Navigating to /TrainerDashboard");
-          navigate("/TrainerDashboard", { replace: true });
+          console.log("Trainer approval status:", user.is_approved);
+          
+          // Check if the trainer is approved
+          if (user.is_approved === true) {
+            // Trainer is approved - store credentials and navigate to dashboard
+            localStorage.setItem("token", token);
+            localStorage.setItem("user", JSON.stringify(user));
+            console.log("Trainer is approved. Navigating to /TrainerDashboard");
+            navigate("/TrainerDashboard", { replace: true });
+          } else {
+            // Trainer is not approved - show the approval pending message
+            setPendingApproval(true);
+            // Don't store credentials to prevent access
+            localStorage.removeItem("token");
+            localStorage.removeItem("user");
+          }
         } else {
           setError("Unknown user role");
         }
@@ -131,11 +155,20 @@ const Signin = () => {
               />
             </div>
             {error && <p className="error-message">{error}</p>}
+            {pendingApproval && (
+              <div className="approval-pending-message">
+                <h3>Admin Approval Required</h3>
+                <p>Your trainer account is awaiting administrator approval.</p>
+                <p>You&apos;ll be notified when your account is approved and ready to use.</p>
+              </div>
+            )}
             <button type="submit" className="submit-button">
               Sign In
             </button>
           </form>
-          <p className="signup-text">Don&apos;t have an account? Sign Up</p>
+          <p className="signup-text">
+            Don&apos;t have an account? <a href="/signup" className="signup-link">Sign Up</a>
+          </p>
         </div>
       </div>
     </>

@@ -18,6 +18,7 @@ import DashboardLayout from "./components/Views/DashboardLayout"; // Import the 
 import Signup from "./components/Signup/Signup"; // Import Signup component
 import VerificationTab from "./components/Signup/VerificationTab"; // Import VerificationTab component
 import Signin from "./components/Signin/Signin"; // Import Signin component
+import TrainerVerificationModal from "./components/TrainerVerificationModal"; // Import the TrainerVerificationModal
 // Import the actual component files
 import YourTrainer from "./components/Views/Trainee/YourTrainer";
 import Hire from "./components/Views/Trainee/Hire";
@@ -71,6 +72,7 @@ function App() {
             <Features />
             <Footer />
             <BackToTopButton />
+            <TrainerVerificationModal />
           </div>
         }
       />

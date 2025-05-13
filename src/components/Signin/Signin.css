@@ -153,6 +153,26 @@
   margin: 10px 0;
 }
 
+.approval-pending-message {
+  background-color: #fff8e1;
+  border-left: 4px solid #ffb300;
+  color: #333;
+  padding: 15px;
+  margin: 15px 0;
+  border-radius: 4px;
+}
+
+.approval-pending-message h3 {
+  color: #f57c00;
+  margin: 0 0 10px 0;
+  font-size: 16px;
+}
+
+.approval-pending-message p {
+  margin: 5px 0;
+  font-size: 14px;
+}
+
 .success-message {
   color: #4caf50;
   font-size: 14px;
