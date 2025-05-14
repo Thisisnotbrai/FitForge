@@ -24,7 +24,7 @@ db.sequelize = sequelize;
 
 db.TrainerInfo = require("../models/TrainerInfo")(sequelize, DataTypes);
 db.User = require("../models/User")(sequelize, DataTypes);
-db.Exercise = require("../models/exercise")(sequelize, DataTypes);
+db.Exercise = require("../models/Exercise")(sequelize, DataTypes);
 db.Workouts = require("../models/Workouts")(sequelize, DataTypes);
 db.WorkoutHistory = require("../models/WorkoutHistory")(sequelize, DataTypes);
 db.Bookings = require("../models/Bookings")(sequelize, DataTypes);
