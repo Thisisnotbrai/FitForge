@@ -20,6 +20,16 @@ import VerificationTab from "./components/Signup/VerificationTab";
 import Signin from "./components/Signin/Signin";
 import TrainerVerificationModal from "./components/TrainerVerificationModal";
 import YourTrainer from "./components/Views/Trainee/YourTrainer";
+import AdminProtectedRoute from "./components/Views/AdminProtectedRoute"; // Import the AdminProtectedRoute
+import AdminSignin from "./components/Views/Admin/AdminSignin"; // Import the AdminSignin component
+import AdminDashboard from "./components/Views/Admin/AdminDashboard"; // Import the AdminDashboard component
+import DashboardLayout from "./components/Views/DashboardLayout"; // Import the layout
+import Signup from "./components/Signup/Signup"; // Import Signup component
+import VerificationTab from "./components/Signup/VerificationTab"; // Import VerificationTab component
+import Signin from "./components/Signin/Signin"; // Import Signin component
+import TrainerVerificationModal from "./components/TrainerVerificationModal"; // Import the TrainerVerificationModal
+// Import the actual component files
+import YourTrainer from "./components/Views/Trainee/YourTrainer.jsx";
 import Hire from "./components/Views/Trainee/Hire";
 import Progress from "./components/Views/Trainee/Progress";
 import Workout from "./components/Views/Trainee/Workout/Workout";
