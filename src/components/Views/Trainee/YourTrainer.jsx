@@ -1,106 +1,210 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faCalendarAlt,
   faTrophy,
   faQuoteLeft,
-  faStar,
-  faUsers,
   faCheckCircle,
   faDumbbell,
 } from "@fortawesome/free-solid-svg-icons";
+import axios from "axios";
 import "./YourTrainer.css";
-
-// Sample trainer data (in a real app, this would come from an API)
-const trainerData = {
-  id: 1,
-  name: "Alex Johnson",
-  avatar:
-    "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
-  credentials: "Certified Personal Trainer, Nutrition Specialist",
-  yearsExperience: 8,
-  clientsHelped: 120,
-  rating: 4.9,
-  bio: "As a dedicated fitness professional with over 8 years of experience, I specialize in strength training, weight management, and sports-specific conditioning. My approach combines scientific principles with practical, sustainable fitness strategies tailored to your unique goals and lifestyle.",
-  specialties: [
-    "Strength Training",
-    "Weight Loss",
-    "Nutrition Planning",
-    "HIIT",
-    "Functional Training",
-    "Sports Conditioning",
-  ],
-  upcomingSessions: [
-    {
-      id: 1,
-      date: "2023-09-15T10:00:00",
-      type: "Strength Training",
-      duration: 60,
-    },
-    {
-      id: 2,
-      date: "2023-09-18T14:30:00",
-      type: "Cardio & Mobility",
-      duration: 45,
-    },
-  ],
-  achievements: [
-    {
-      id: 1,
-      title: "Completed 4 weeks of strength training",
-      date: "2023-08-30",
-    },
-    {
-      id: 2,
-      title: "Reached target weight goal",
-      date: "2023-08-15",
-    },
-    {
-      id: 3,
-      title: "Improved mile run time by 15%",
-      date: "2023-07-28",
-    },
-  ],
-  testimonials: [
-    {
-      id: 1,
-      text: "Alex has been instrumental in helping me achieve my fitness goals. His personalized approach and constant motivation kept me going even when I wanted to give up.",
-      author: "Michael P.",
-    },
-    {
-      id: 2,
-      text: "I've tried many trainers before, but Alex truly understands how to balance pushing you while keeping workouts enjoyable. I've seen amazing results in just 3 months!",
-      author: "Sarah T.",
-    },
-  ],
-};
 
 const YourTrainer = () => {
   const [trainer, setTrainer] = useState(null);
+  const [partnership, setPartnership] = useState(null);
+  const [bookings, setBookings] = useState([]);
+  const [achievements, setAchievements] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  // Simulate data fetching
+  // Fetch user data, partnership, and trainer data
   useEffect(() => {
-    // In a real app, this would be an API call
-    setTimeout(() => {
-      setTrainer(trainerData);
-      setLoading(false);
-    }, 500);
+    const fetchTrainerData = async () => {
+      try {
+        setLoading(true);
+
+        // Get authentication token and user from localStorage (matching your auth pattern)
+        const token = localStorage.getItem("token");
+        if (!token) {
+          throw new Error("Not authenticated");
+        }
+
+        // Get user from localStorage
+        const userString = localStorage.getItem("user");
+        if (!userString) {
+          throw new Error("User data not found");
+        }
+
+        const user = JSON.parse(userString);
+
+        // Verify user is a trainee
+        const userRole = user.role || user.user_role;
+        if (userRole !== "trainee") {
+          throw new Error("This page is for trainees only");
+        }
+
+        // Fetch partnerships for this trainee using API with authentication
+        const partnershipResponse = await axios.get(
+          `http://localhost:3000/partnership/trainee/${user.id}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+
+        // Find active partnership (if any)
+        const activePartnership = partnershipResponse.data.find(
+          (p) => p.status === "active"
+        );
+
+        if (activePartnership) {
+          setPartnership(activePartnership);
+
+          // If we have an active partnership, get trainer info from the partnership
+          const trainerInfo = activePartnership.trainer;
+
+          // Fetch upcoming bookings with this trainer
+          const bookingsResponse = await axios.get(
+            `http://localhost:3000/booking/trainee/${user.id}`,
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            }
+          );
+
+          // Filter to only include bookings with this trainer and with future dates
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+
+          const upcomingBookings = bookingsResponse.data.filter((booking) => {
+            const bookingDate = new Date(booking.date);
+            bookingDate.setHours(0, 0, 0, 0);
+            return (
+              booking.trainer_id === trainerInfo.id &&
+              bookingDate >= today &&
+              (booking.status === "confirmed" || booking.status === "pending")
+            );
+          });
+
+          setBookings(upcomingBookings);
+
+          // Set mock achievements for now (this would come from a real endpoint in production)
+          setAchievements([
+            {
+              id: 1,
+              title: "Completed 4 weeks of strength training",
+              date: new Date(
+                today.getTime() - 15 * 24 * 60 * 60 * 1000
+              ).toISOString(),
+            },
+            {
+              id: 2,
+              title: "Reached target weight goal",
+              date: new Date(
+                today.getTime() - 30 * 24 * 60 * 60 * 1000
+              ).toISOString(),
+            },
+          ]);
+
+          // Convert trainer data to match the format your component expects
+          setTrainer({
+            id: trainerInfo.id,
+            name: trainerInfo.user_name,
+            credentials: trainerInfo.trainerInfo
+              ? `${trainerInfo.trainerInfo.specialization} Specialist`
+              : "Certified Personal Trainer",
+            specialties: trainerInfo.trainerInfo
+              ? [trainerInfo.trainerInfo.specialization]
+              : ["Strength Training", "Cardio", "Nutrition"],
+            testimonials: [
+              {
+                id: 1,
+                text: "An excellent trainer who really understands how to motivate clients and design effective workout plans.",
+                author: "Michael P.",
+              },
+            ],
+          });
+        }
+      } catch (err) {
+        console.error("Error fetching trainer data:", err);
+        setError(
+          "Failed to load your trainer information. Please try again later."
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTrainerData();
   }, []);
 
-  // Format date for upcoming sessions
-  const formatSessionDate = (dateString) => {
+  // Handle partnership status change
+  const handlePartnershipStatusChange = async (newStatus) => {
+    try {
+      // Get authentication token (same as used in useEffect)
+      const token = localStorage.getItem("token");
+      if (!token) {
+        throw new Error("Not authenticated");
+      }
+
+      console.log(
+        `Updating partnership ${partnership.id} to status: ${newStatus}`
+      );
+
+      // Make the API call to update partnership status
+      await axios.put(
+        `http://localhost:3000/partnership/${partnership.id}/status`,
+        { status: newStatus },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      console.log(`Successfully updated partnership to ${newStatus}`);
+
+      // If partnership is terminated, remove the trainer
+      if (newStatus === "terminated") {
+        setTrainer(null);
+        setPartnership(null);
+      } else if (newStatus === "paused" || newStatus === "active") {
+        // Update partnership status locally for both pause and resume cases
+        setPartnership({
+          ...partnership,
+          status: newStatus,
+        });
+      }
+    } catch (err) {
+      console.error("Error updating partnership status:", err);
+      console.error(
+        "Error details:",
+        err.response ? err.response.data : "No response data"
+      );
+      console.error(
+        "Request URL:",
+        err.config ? err.config.url : "Unknown URL"
+      );
+      setError(
+        "Failed to update trainer relationship status. Please try again."
+      );
+    }
+  };
+
+  // Format session date and time from start_date and end_date
+  const formatSessionDate = (dateString, startDateString, endDateString) => {
     const date = new Date(dateString);
+    const startDate = new Date(startDateString);
+    const endDate = new Date(endDateString);
+
     return {
       day: date.toLocaleDateString("en-US", {
         weekday: "short",
         month: "short",
         day: "numeric",
       }),
-      time: date.toLocaleTimeString("en-US", {
+      time: `${startDate.toLocaleTimeString("en-US", {
         hour: "2-digit",
         minute: "2-digit",
-      }),
+      })} - ${endDate.toLocaleTimeString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+      })}`,
     };
   };
 
@@ -115,46 +219,30 @@ const YourTrainer = () => {
     );
   }
 
+  if (error) {
+    return (
+      <div className="trainer-page">
+        <div className="trainer-page-header">
+          <h1>Your Trainer</h1>
+          <div className="error-message">{error}</div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="trainer-page">
       <div className="trainer-page-header">
         <h1>Your Trainer</h1>
-        <p>View your assigned trainer's profile and upcoming sessions</p>
+        <p>View your assigned trainer&apos;s profile and upcoming sessions</p>
       </div>
 
-      {trainer ? (
+      {trainer && partnership && partnership.status === "active" ? (
         <>
           <div className="trainer-profile-card">
-            <img
-              src={trainer.avatar}
-              alt={trainer.name}
-              className="trainer-avatar"
-            />
             <div className="trainer-info">
               <h2 className="trainer-name">{trainer.name}</h2>
               <p className="trainer-credentials">{trainer.credentials}</p>
-
-              <div className="trainer-stats">
-                <div className="stat">
-                  <span className="stat-value">{trainer.yearsExperience}</span>
-                  <span className="stat-label">Years</span>
-                </div>
-                <div className="stat">
-                  <span className="stat-value">{trainer.clientsHelped}+</span>
-                  <span className="stat-label">Clients</span>
-                </div>
-                <div className="stat">
-                  <span className="stat-value">{trainer.rating}</span>
-                  <span className="stat-label">
-                    <FontAwesomeIcon
-                      icon={faStar}
-                      style={{ color: "#FFD700" }}
-                    />
-                  </span>
-                </div>
-              </div>
-
-              <p className="trainer-bio">{trainer.bio}</p>
 
               <div className="trainer-specialties">
                 <h3 className="specialties-title">Specialties</h3>
@@ -168,9 +256,17 @@ const YourTrainer = () => {
               </div>
 
               <div className="trainer-buttons">
-                <button className="contact-trainer-btn">Message Trainer</button>
-                <button className="view-schedule-btn">
-                  View Full Schedule
+                <button
+                  className="pause-partnership-btn"
+                  onClick={() => handlePartnershipStatusChange("paused")}
+                >
+                  Pause Partnership
+                </button>
+                <button
+                  className="terminate-partnership-btn"
+                  onClick={() => handlePartnershipStatusChange("terminated")}
+                >
+                  End Partnership
                 </button>
               </div>
             </div>
@@ -182,9 +278,13 @@ const YourTrainer = () => {
                 <FontAwesomeIcon icon={faCalendarAlt} /> Upcoming Sessions
               </h3>
 
-              {trainer.upcomingSessions.length > 0 ? (
-                trainer.upcomingSessions.map((session) => {
-                  const { day, time } = formatSessionDate(session.date);
+              {bookings && bookings.length > 0 ? (
+                bookings.map((session) => {
+                  const { day, time } = formatSessionDate(
+                    session.date,
+                    session.start_date,
+                    session.end_date
+                  );
                   return (
                     <div key={session.id} className="upcoming-session">
                       <div>
@@ -192,7 +292,13 @@ const YourTrainer = () => {
                           {day} at {time}
                         </div>
                         <div className="session-detail">
-                          {session.type} ({session.duration} min)
+                          {session.type || "Training Session"} (
+                          {Math.round(
+                            (new Date(session.end_date) -
+                              new Date(session.start_date)) /
+                              60000
+                          )}{" "}
+                          min)
                         </div>
                       </div>
                       <button className="session-action">Join</button>
@@ -234,37 +340,65 @@ const YourTrainer = () => {
                 <FontAwesomeIcon icon={faTrophy} /> Your Achievements
               </h3>
 
-              {trainer.achievements.map((achievement) => (
-                <div key={achievement.id} className="achievement">
-                  <div className="achievement-icon">
-                    <FontAwesomeIcon icon={faCheckCircle} />
-                  </div>
-                  <div>
-                    <div className="achievement-text">{achievement.title}</div>
-                    <div className="achievement-date">
-                      {new Date(achievement.date).toLocaleDateString()}
+              {achievements && achievements.length > 0 ? (
+                achievements.map((achievement) => (
+                  <div key={achievement.id} className="achievement">
+                    <div className="achievement-icon">
+                      <FontAwesomeIcon icon={faCheckCircle} />
+                    </div>
+                    <div>
+                      <div className="achievement-text">
+                        {achievement.title}
+                      </div>
+                      <div className="achievement-date">
+                        {new Date(achievement.date).toLocaleDateString()}
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))
+              ) : (
+                <p>
+                  No achievements recorded yet. Keep working with your trainer!
+                </p>
+              )}
 
               <h3 className="section-title" style={{ marginTop: "30px" }}>
                 <FontAwesomeIcon icon={faQuoteLeft} /> Client Testimonials
               </h3>
 
-              {trainer.testimonials.map((testimonial) => (
-                <div key={testimonial.id} className="testimonial">
-                  <p className="testimonial-text">"{testimonial.text}"</p>
-                  <p className="testimonial-author">— {testimonial.author}</p>
-                </div>
-              ))}
+              {trainer.testimonials && trainer.testimonials.length > 0 ? (
+                trainer.testimonials.map((testimonial) => (
+                  <div key={testimonial.id} className="testimonial">
+                    <p className="testimonial-text">
+                      &quot;{testimonial.text}&quot;
+                    </p>
+                    <p className="testimonial-author">— {testimonial.author}</p>
+                  </div>
+                ))
+              ) : (
+                <p>No testimonials available yet.</p>
+              )}
             </div>
           </div>
         </>
+      ) : partnership && partnership.status === "paused" ? (
+        <div className="paused-partnership">
+          <h2>Partnership Paused</h2>
+          <p>
+            Your partnership with {trainer ? trainer.name : "your trainer"} is
+            currently paused.
+          </p>
+          <button
+            className="resume-partnership-btn"
+            onClick={() => handlePartnershipStatusChange("active")}
+          >
+            Resume Partnership
+          </button>
+        </div>
       ) : (
         <div className="placeholder-page">
           <h1>No Trainer Assigned</h1>
-          <p>You don't have a trainer assigned to your account yet.</p>
+          <p>You don&apos;t have a trainer assigned to your account yet.</p>
           <button className="contact-trainer-btn">Find a Trainer</button>
         </div>
       )}

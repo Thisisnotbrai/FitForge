@@ -14,6 +14,9 @@ const Hire = () => {
   const [showModal, setShowModal] = useState(false);
   const [selectedTrainer, setSelectedTrainer] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
+  const [hasActivePartnership, setHasActivePartnership] = useState(false);
+  const [activePartnershipTrainer, setActivePartnershipTrainer] =
+    useState(null);
 
   useEffect(() => {
     // Fetch current user from localStorage instead of an API call
@@ -32,9 +35,47 @@ const Hire = () => {
         const user = JSON.parse(userString);
         console.log("Current user from localStorage:", user);
         setCurrentUser(user);
+
+        // Check if user has active partnerships
+        if (user.id) {
+          checkActivePartnerships(user.id);
+        }
       } catch (err) {
         console.error("Error fetching current user:", err);
         setError("Please log in to book a trainer");
+      }
+    };
+
+    // Check if trainee has any active partnerships
+    const checkActivePartnerships = async (traineeId) => {
+      try {
+        const response = await axios.get(
+          `http://localhost:3000/partnership/trainee/${traineeId}`
+        );
+
+        console.log("Partnerships response:", response.data);
+
+        // Filter to only find active partnerships
+        const activePartnerships = response.data.filter(
+          (partnership) => partnership.status === "active"
+        );
+
+        if (activePartnerships.length > 0) {
+          setHasActivePartnership(true);
+          // If there's an active partnership, get the trainer name for the message
+          const trainerInfo = activePartnerships[0].trainer;
+          setActivePartnershipTrainer({
+            id: trainerInfo.id,
+            name: trainerInfo.user_name,
+          });
+        } else {
+          setHasActivePartnership(false);
+          setActivePartnershipTrainer(null);
+        }
+      } catch (err) {
+        console.error("Error checking partnerships:", err);
+        // Don't block the UI if we can't check partnerships
+        setHasActivePartnership(false);
       }
     };
 
@@ -42,6 +83,7 @@ const Hire = () => {
     const fetchTrainers = async () => {
       try {
         console.log("Fetching trainers from API");
+        // Updated to match backend API endpoint if needed
         const response = await axios.get(
           `http://localhost:3000/trainerinfo/trainers`
         );
@@ -153,6 +195,19 @@ const Hire = () => {
       return;
     }
 
+    // Check if trainee already has an active partnership with any trainer
+    if (hasActivePartnership) {
+      // Show message if trainee already has a trainer
+      const trainerName = activePartnershipTrainer
+        ? activePartnershipTrainer.name
+        : "another trainer";
+      alert(
+        `You already have an active partnership with ${trainerName}. You can only have one trainer at a time.`
+      );
+      return;
+    }
+
+    // Allow booking if no active partnerships
     setSelectedTrainer(trainer);
     setShowModal(true);
   };
@@ -174,6 +229,17 @@ const Hire = () => {
           your fitness goals
         </p>
       </div>
+
+      {hasActivePartnership && activePartnershipTrainer && (
+        <div className="active-partnership-notice">
+          <p>
+            <strong>Note:</strong> You already have an active partnership with
+            trainer <strong>{activePartnershipTrainer.name}</strong>. You cannot
+            book sessions with other trainers until this partnership is
+            terminated.
+          </p>
+        </div>
+      )}
 
       <div className="search-filter-container">
         <div className="search-box">
@@ -215,8 +281,17 @@ const Hire = () => {
                   <button
                     className="hire-btn"
                     onClick={() => handleHireClick(trainer)}
+                    disabled={
+                      hasActivePartnership &&
+                      (!activePartnershipTrainer ||
+                        activePartnershipTrainer.id !== trainer.id)
+                    }
                   >
-                    Hire Now
+                    {hasActivePartnership &&
+                    activePartnershipTrainer &&
+                    activePartnershipTrainer.id === trainer.id
+                      ? "Book Again"
+                      : "Hire Now"}
                   </button>
                 </div>
               </div>

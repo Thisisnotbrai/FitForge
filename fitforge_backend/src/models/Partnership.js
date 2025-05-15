@@ -14,6 +14,12 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.DATE,
         allowNull: false,
         defaultValue: DataTypes.NOW,
+        comment: "The date when the partnership began",
+      },
+      end_date: {
+        type: DataTypes.DATE,
+        allowNull: true,
+        comment: "The date when the partnership ended (null if still active)",
       },
       status: {
         type: DataTypes.ENUM("active", "paused", "terminated"),

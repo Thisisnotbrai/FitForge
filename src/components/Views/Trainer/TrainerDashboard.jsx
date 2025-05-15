@@ -156,6 +156,20 @@ const TrainerDashboard = () => {
     }
   };
 
+  // Format time from dates
+  const formatTime = (dateTimeString) => {
+    try {
+      const date = new Date(dateTimeString);
+      return date.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    } catch (e) {
+      console.error("Error formatting time:", dateTimeString, e);
+      return "Invalid time";
+    }
+  };
+
   // Filter bookings based on active tab
   const filteredBookings = Array.isArray(bookings)
     ? bookings.filter((booking) => {
@@ -309,10 +323,8 @@ const TrainerDashboard = () => {
                     <div className="booking-date">
                       <h3>{formatDate(booking.date)}</h3>
                       <p>
-                        {booking.start_time?.substring(0, 5) ||
-                          booking.start_time}{" "}
-                        -{" "}
-                        {booking.end_time?.substring(0, 5) || booking.end_time}
+                        {formatTime(booking.start_date)} -{" "}
+                        {formatTime(booking.end_date)}
                       </p>
                     </div>
                     <div className="booking-status">
@@ -444,7 +456,7 @@ const TrainerDashboard = () => {
                       </h3>
                       <p>
                         <strong>Since:</strong>{" "}
-                        {formatDate(partnership.createdAt)}
+                        {formatDate(partnership.start_date)}
                       </p>
                     </div>
                     <div className="partnership-status">

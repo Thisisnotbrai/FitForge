@@ -4,7 +4,7 @@ const { Partnership, User, Bookings } = db;
 // Create a new partnership between trainer and trainee
 exports.createPartnership = async (req, res) => {
   try {
-    const { trainee_id, trainer_id, notes } = req.body;
+    const { trainee_id, trainer_id, start_date, notes } = req.body;
 
     // Validate that both users exist with proper roles
     const trainee = await User.findOne({
@@ -44,10 +44,12 @@ exports.createPartnership = async (req, res) => {
       });
     }
 
-    // Create new partnership
+    // Create new partnership with optional start_date
     const partnership = await Partnership.create({
       trainee_id,
       trainer_id,
+      start_date: start_date || new Date(), // Use provided date or default to now
+      end_date: null, // Initially null since it's a new active partnership
       notes,
       status: "active",
     });
@@ -124,7 +126,7 @@ exports.getTrainerPartnerships = async (req, res) => {
 exports.updatePartnershipStatus = async (req, res) => {
   try {
     const { partnershipId } = req.params;
-    const { status, notes } = req.body;
+    const { status, notes, end_date } = req.body;
 
     // Validate status
     if (!["active", "paused", "terminated"].includes(status)) {
@@ -138,6 +140,17 @@ exports.updatePartnershipStatus = async (req, res) => {
 
     // Update partnership
     partnership.status = status;
+
+    // If terminating, set end_date if not already set
+    if (status === "terminated" && !partnership.end_date) {
+      partnership.end_date = end_date || new Date();
+    }
+
+    // If reactivating, clear end_date
+    if (status === "active" && partnership.end_date) {
+      partnership.end_date = null;
+    }
+
     if (notes) partnership.notes = notes;
     await partnership.save();
 
@@ -193,10 +206,12 @@ exports.checkAndCreatePartnershipFromBooking = async (bookingId) => {
       return partnership;
     }
 
-    // Create new partnership
+    // Create new partnership using the booking's start_date
     partnership = await Partnership.create({
       trainee_id,
       trainer_id,
+      start_date: booking.start_date,
+      end_date: null,
       notes: `Partnership created from confirmed booking #${bookingId}`,
       status: "active",
     });
@@ -231,6 +246,8 @@ exports.managePartnershipFromBookingStatus = async (bookingId, newStatus) => {
           partnership = await Partnership.create({
             trainee_id,
             trainer_id,
+            start_date: booking.start_date,
+            end_date: null,
             notes: `Partnership created from confirmed booking #${bookingId}`,
             status: "active",
           });
@@ -240,6 +257,7 @@ exports.managePartnershipFromBookingStatus = async (bookingId, newStatus) => {
         } else if (partnership.status !== "active") {
           // If partnership exists but isn't active, reactivate it
           partnership.status = "active";
+          partnership.end_date = null; // Clear end date when reactivating
           partnership.notes =
             partnership.notes + `\nReactivated from booking #${bookingId}`;
           await partnership.save();
@@ -253,6 +271,7 @@ exports.managePartnershipFromBookingStatus = async (bookingId, newStatus) => {
         // If partnership exists, terminate it
         if (partnership) {
           partnership.status = "terminated";
+          partnership.end_date = new Date(); // Set end date to now
           partnership.notes =
             partnership.notes +
             `\nTerminated due to cancelled booking #${bookingId}`;
@@ -277,6 +296,7 @@ exports.managePartnershipFromBookingStatus = async (bookingId, newStatus) => {
 
         if (activeBookings === 0 && partnership) {
           partnership.status = "terminated";
+          partnership.end_date = new Date(); // Set end date to now
           partnership.notes =
             partnership.notes +
             `\nTerminated after completed booking #${bookingId} with no future bookings`;

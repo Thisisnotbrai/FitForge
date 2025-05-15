@@ -1,4 +1,3 @@
-/* eslint-disable no-undef */
 module.exports = (sequelize, DataTypes) => {
   const Bookings = sequelize.define(
     "Bookings",
@@ -14,14 +13,17 @@ module.exports = (sequelize, DataTypes) => {
       date: {
         type: DataTypes.DATE,
         allowNull: false,
+        comment: "The date for the booking",
       },
-      start_time: {
-        type: DataTypes.STRING,
+      start_date: {
+        type: DataTypes.DATE,
         allowNull: false,
+        comment: "Full date and time for the start of the booking",
       },
-      end_time: {
-        type: DataTypes.STRING,
+      end_date: {
+        type: DataTypes.DATE,
         allowNull: false,
+        comment: "Full date and time for the end of the booking",
       },
       status: {
         type: DataTypes.ENUM("pending", "confirmed", "cancelled", "completed"),

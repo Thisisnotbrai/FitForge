@@ -138,12 +138,22 @@ const BookingStatusUpdater = ({ booking, onStatusChange }) => {
     }
   };
 
+  // Format date for display
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleString();
+  };
+
   return (
     <div className="booking-status-updater">
       <div className="status-info">
         <span className={`status-badge ${booking.status}`}>
           {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
         </span>
+        {booking.notes && (
+          <div className="booking-notes">
+            <strong>Notes:</strong> {booking.notes}
+          </div>
+        )}
       </div>
 
       {renderActionButtons()}
@@ -183,8 +193,11 @@ BookingStatusUpdater.propTypes = {
       .isRequired,
     status: PropTypes.string.isRequired,
     date: PropTypes.string.isRequired,
-    start_time: PropTypes.string.isRequired,
-    end_time: PropTypes.string.isRequired,
+    start_date: PropTypes.string.isRequired,
+    end_date: PropTypes.string.isRequired,
+    notes: PropTypes.string,
+    createdAt: PropTypes.string,
+    updatedAt: PropTypes.string,
   }).isRequired,
   onStatusChange: PropTypes.func.isRequired,
 };

@@ -38,12 +38,27 @@ const PartnershipDisplay = ({ userId, userRole }) => {
     try {
       await axios.put(`/partnership/${partnershipId}/status`, {
         status: newStatus,
+        // Add end_date if terminating the partnership
+        ...(newStatus === "terminated" && {
+          end_date: new Date().toISOString(),
+        }),
       });
 
       // Update the local state
       setPartnerships(
         partnerships.map((p) =>
-          p.id === partnershipId ? { ...p, status: newStatus } : p
+          p.id === partnershipId
+            ? {
+                ...p,
+                status: newStatus,
+                // If terminating, set end_date
+                ...(newStatus === "terminated" && {
+                  end_date: new Date().toISOString(),
+                }),
+                // If activating, clear end_date
+                ...(newStatus === "active" && { end_date: null }),
+              }
+            : p
         )
       );
     } catch (err) {
@@ -96,6 +111,13 @@ const PartnershipDisplay = ({ userId, userRole }) => {
                   <strong>Since:</strong>{" "}
                   {new Date(partnership.start_date).toLocaleDateString()}
                 </p>
+
+                {partnership.end_date && (
+                  <p>
+                    <strong>Until:</strong>{" "}
+                    {new Date(partnership.end_date).toLocaleDateString()}
+                  </p>
+                )}
 
                 {userRole === "trainee" && partnership.trainer.trainerInfo && (
                   <p>
