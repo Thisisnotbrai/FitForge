@@ -28,7 +28,8 @@ const Workout = () => {
       calories: 345,
       level: "Intermediate",
       type: "Challenge",
-      image: "https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=800&q=80",
+      image:
+        "https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=800&q=80",
     },
     {
       title: "Strength",
@@ -36,7 +37,8 @@ const Workout = () => {
       calories: 345,
       level: "Beginner",
       type: "Challenge",
-      image: "https://images.unsplash.com/photo-1517960413843-0aee8e2d471c?auto=format&fit=crop&w=800&q=80",
+      image:
+        "https://images.unsplash.com/photo-1517960413843-0aee8e2d471c?auto=format&fit=crop&w=800&q=80",
     },
     {
       title: "Full Body",
@@ -44,7 +46,8 @@ const Workout = () => {
       calories: 289,
       level: "Intermediate",
       type: "Workout",
-      image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80",
+      image:
+        "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80",
     },
     {
       title: "Power Sculpt",
@@ -52,7 +55,8 @@ const Workout = () => {
       calories: 345,
       level: "Advanced",
       type: "Challenge",
-      image: "https://images.unsplash.com/photo-1519864600265-abb23847ef2c?auto=format&fit=crop&w=800&q=80",
+      image:
+        "https://images.unsplash.com/photo-1519864600265-abb23847ef2c?auto=format&fit=crop&w=800&q=80",
     },
     {
       title: "HIIT Burn",
@@ -60,7 +64,8 @@ const Workout = () => {
       calories: 427,
       level: "Advanced",
       type: "Workout",
-      image: "https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?auto=format&fit=crop&w=800&q=80",
+      image:
+        "https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?auto=format&fit=crop&w=800&q=80",
     },
   ];
 
@@ -525,200 +530,6 @@ const Workout = () => {
 
   return (
     <div className="workout-container">
-      {/* Premade Workouts Section */}
-      <div className="section-header" style={{ marginBottom: '1.5rem' }}>
-        <h2>Premade Workouts</h2>
-      </div>
-      <div className="premade-workouts-grid">
-        {premadeWorkouts.map((workout, idx) => (
-          <div
-            className="premade-workout-card"
-            key={idx}
-            style={{
-              backgroundImage: `linear-gradient(120deg, rgba(0,0,0,0.35), rgba(0,0,0,0.15)), url(${workout.image})`,
-            }}
-          >
-            <div className="premade-card-content">
-              <span className={`premade-badge ${workout.type.toLowerCase()}`}>{workout.type}</span>
-              <h3>{workout.title}</h3>
-              <div className="premade-meta">
-                <span>🔥 {workout.calories} Kcal</span>
-                <span>⏱ {workout.duration}</span>
-              </div>
-              <button className="btn-premade-start">Start Workout</button>
-            {category.charAt(0).toUpperCase() + category.slice(1)}
-          </button>
-        ))}
-      </div>
-
-      {/* Featured Workouts Section */}
-      <section className="featured-workouts">
-        <div className="section-header">
-          <h2>Featured Workouts</h2>
-          <Link to="/workouts" className="view-all-link">
-            View All
-          </Link>
-        </div>
-
-        {renderWorkoutCards(workouts.featured)}
-      </section>
-
-      {/* My Workouts Section - Only shown if user has created workouts */}
-      {workouts.user && workouts.user.length > 0 && (
-        <section className="my-workouts">
-          <div className="section-header">
-            <h2>My Custom Workouts</h2>
-          </div>
-
-          {renderWorkoutCards(workouts.user, true)}
-        </section>
-      )}
-
-      {/* Add Workout Section */}
-      <section className="add-workout-section">
-        <div className="section-header">
-          <h2>{isEditing ? "Edit Your Workout" : "Create Your Own Workout"}</h2>
-          <button
-            className={`add-workout-toggle ${showAddForm ? "active" : ""}`}
-            onClick={toggleAddForm}
-          >
-            {showAddForm
-              ? "Cancel"
-              : isEditing
-              ? "Edit Workout"
-              : "Add Workout"}
-          </button>
-        </div>
-
-        {showAddForm && (
-          <div className="add-workout-form-container">
-            {formError && <div className="form-error">{formError}</div>}
-            {formSuccess && <div className="form-success">{formSuccess}</div>}
-
-            <form className="add-workout-form" onSubmit={handleAddWorkout}>
-              <div className="form-group">
-                <label htmlFor="workout_name">Workout Name*</label>
-                <input
-                  type="text"
-                  id="workout_name"
-                  name="workout_name"
-                  value={newWorkout.workout_name}
-                  onChange={handleInputChange}
-                  placeholder="Enter workout name"
-                  required
-                />
-              </div>
-
-              <div className="form-row">
-                <div className="form-group">
-                  <label htmlFor="workout_type">Workout Type*</label>
-                  <input
-                    type="text"
-                    id="workout_type"
-                    name="workout_type"
-                    value={newWorkout.workout_type}
-                    onChange={handleInputChange}
-                    placeholder="e.g., Cardio, Strength"
-                    required
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="workout_level">Difficulty Level</label>
-                  <select
-                    id="workout_level"
-                    name="workout_level"
-                    value={newWorkout.workout_level}
-                    onChange={handleInputChange}
-                  >
-                    <option value="Beginner">Beginner</option>
-                    <option value="Intermediate">Intermediate</option>
-                    <option value="Advanced">Advanced</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="form-row">
-                <div className="form-group">
-                  <label htmlFor="workout_duration">Duration (minutes)*</label>
-                  <input
-                    type="number"
-                    id="workout_duration"
-                    name="workout_duration"
-                    value={newWorkout.workout_duration}
-                    onChange={handleInputChange}
-                    placeholder="Duration in minutes"
-                    min="1"
-                    required
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="workout_calories">Calories Burned*</label>
-                  <input
-                    type="number"
-                    id="workout_calories"
-                    name="workout_calories"
-                    value={newWorkout.workout_calories}
-                    onChange={handleInputChange}
-                    placeholder="Estimated calories"
-                    min="1"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="description">Description</label>
-                <textarea
-                  id="description"
-                  name="description"
-                  value={newWorkout.description}
-                  onChange={handleInputChange}
-                  placeholder="Describe the workout and what it targets"
-                  rows="4"
-                ></textarea>
-              </div>
-
-              <div className="form-actions">
-                <button type="submit" className="btn-add-workout">
-                  {isEditing ? "Update Workout" : "Create Workout"}
-                </button>
-                {isEditing && (
-                  <button
-                    type="button"
-                    className="btn-delete-workout"
-                    onClick={() => handleDeleteWorkout(currentWorkoutId)}
-                  >
-                    Delete Workout
-                  </button>
-                )}
-                <button
-                  type="button"
-                  className="btn-cancel"
-                  onClick={toggleAddForm}
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
-          </div>
-        )}
-
-        {!showAddForm && (
-          <div className="add-workout-card">
-            <div className="add-workout-content">
-              <div className="add-icon">+</div>
-              <h3>Create Custom Workout</h3>
-              <p>Design your own personalized workout routine</p>
-              <button className="btn-create-workout" onClick={toggleAddForm}>
-                Get Started
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
-      {/* Existing Workout Page Content Below */}
       <div className="workout-dashboard">
         {/* Hero Section */}
         <div className="workout-hero">
@@ -745,6 +556,34 @@ const Workout = () => {
           ))}
         </div>
 
+        {/* Premade Workouts Section */}
+        <div className="section-header" style={{ marginBottom: "1.5rem" }}>
+          <h2>Premade Workouts</h2>
+        </div>
+        <div className="premade-workouts-grid">
+          {premadeWorkouts.map((workout, idx) => (
+            <div
+              className="premade-workout-card"
+              key={idx}
+              style={{
+                backgroundImage: `linear-gradient(120deg, rgba(0,0,0,0.35), rgba(0,0,0,0.15)), url(${workout.image})`,
+              }}
+            >
+              <div className="premade-card-content">
+                <span className={`premade-badge ${workout.type.toLowerCase()}`}>
+                  {workout.type}
+                </span>
+                <h3>{workout.title}</h3>
+                <div className="premade-meta">
+                  <span>🔥 {workout.calories} Kcal</span>
+                  <span>⏱ {workout.duration}</span>
+                </div>
+                <button className="btn-premade-start">Start Workout</button>
+              </div>
+            </div>
+          ))}
+        </div>
+
         {/* Featured Workouts Section */}
         <section className="featured-workouts">
           <div className="section-header">
@@ -763,7 +602,7 @@ const Workout = () => {
             <div className="section-header">
               <h2>My Custom Workouts</h2>
             </div>
-            
+
             {renderWorkoutCards(workouts.user, true)}
           </section>
         )}
@@ -771,12 +610,18 @@ const Workout = () => {
         {/* Add Workout Section */}
         <section className="add-workout-section">
           <div className="section-header">
-            <h2>{isEditing ? 'Edit Your Workout' : 'Create Your Own Workout'}</h2>
-            <button 
-              className={`add-workout-toggle ${showAddForm ? 'active' : ''}`} 
+            <h2>
+              {isEditing ? "Edit Your Workout" : "Create Your Own Workout"}
+            </h2>
+            <button
+              className={`add-workout-toggle ${showAddForm ? "active" : ""}`}
               onClick={toggleAddForm}
             >
-              {showAddForm ? 'Cancel' : isEditing ? 'Edit Workout' : 'Add Workout'}
+              {showAddForm
+                ? "Cancel"
+                : isEditing
+                ? "Edit Workout"
+                : "Add Workout"}
             </button>
           </div>
 
@@ -784,7 +629,7 @@ const Workout = () => {
             <div className="add-workout-form-container">
               {formError && <div className="form-error">{formError}</div>}
               {formSuccess && <div className="form-success">{formSuccess}</div>}
-              
+
               <form className="add-workout-form" onSubmit={handleAddWorkout}>
                 <div className="form-group">
                   <label htmlFor="workout_name">Workout Name*</label>
@@ -830,7 +675,9 @@ const Workout = () => {
 
                 <div className="form-row">
                   <div className="form-group">
-                    <label htmlFor="workout_duration">Duration (minutes)*</label>
+                    <label htmlFor="workout_duration">
+                      Duration (minutes)*
+                    </label>
                     <input
                       type="number"
                       id="workout_duration"
@@ -872,7 +719,7 @@ const Workout = () => {
 
                 <div className="form-actions">
                   <button type="submit" className="btn-add-workout">
-                    {isEditing ? 'Update Workout' : 'Create Workout'}
+                    {isEditing ? "Update Workout" : "Create Workout"}
                   </button>
                   {isEditing && (
                     <button
@@ -883,9 +730,9 @@ const Workout = () => {
                       Delete Workout
                     </button>
                   )}
-                  <button 
-                    type="button" 
-                    className="btn-cancel" 
+                  <button
+                    type="button"
+                    className="btn-cancel"
                     onClick={toggleAddForm}
                   >
                     Cancel
