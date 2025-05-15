@@ -258,17 +258,17 @@
     align-items: center;
     text-align: center;
   }
-  
+
   .trainer-stats {
     justify-content: center;
   }
-  
+
   .trainer-buttons {
     display: flex;
     justify-content: center;
   }
-  
+
   .trainer-sections {
     grid-template-columns: 1fr;
   }
-} 
+}

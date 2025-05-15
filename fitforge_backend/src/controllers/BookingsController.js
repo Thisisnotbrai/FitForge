@@ -1,5 +1,6 @@
 const db = require("../models/database");
 const { Bookings, User, TrainerInfo } = db;
+const partnershipController = require("./PartnershipController");
 
 // Create a new booking
 exports.createBooking = async (req, res) => {
@@ -184,9 +185,20 @@ exports.updateBookingStatus = async (req, res) => {
       return res.status(404).json({ message: "Booking not found" });
     }
 
-    // Update status
+    // Store the old status to check if it's actually changing
+    const oldStatus = booking.status;
+
+    // Update booking
     booking.status = status;
     await booking.save();
+
+    // If status has changed, manage the partnership
+    if (oldStatus !== status) {
+      await partnershipController.managePartnershipFromBookingStatus(
+        bookingId,
+        status
+      );
+    }
 
     return res.status(200).json(booking);
   } catch (error) {
@@ -214,5 +226,105 @@ exports.deleteBooking = async (req, res) => {
     return res
       .status(500)
       .json({ message: "Server error", error: error.message });
+  }
+};
+
+// Debug endpoint to directly check bookings in database
+exports.debugTrainerBookings = async (req, res) => {
+  try {
+    const { trainerId } = req.params;
+
+    console.log(
+      `[BookingsController DEBUG] Checking bookings for trainer ID: ${trainerId}`
+    );
+
+    // Convert ID to number
+    const trainerIdNum = parseInt(trainerId, 10);
+
+    if (isNaN(trainerIdNum)) {
+      return res.status(400).json({
+        message: "Invalid trainer ID format",
+        success: false,
+      });
+    }
+
+    // First check if the trainer exists
+    const trainerExists = await User.findOne({
+      where: { id: trainerIdNum, user_role: "trainer" },
+    });
+
+    if (!trainerExists) {
+      return res.status(404).json({
+        message: "Trainer not found",
+        success: false,
+      });
+    }
+
+    // Debug output about the trainer
+    console.log("[BookingsController DEBUG] Found trainer:", {
+      id: trainerExists.id,
+      name: trainerExists.user_name,
+      email: trainerExists.user_email,
+      role: trainerExists.user_role,
+    });
+
+    // Check for bookings using direct SQL query
+    const rawBookings = await db.sequelize.query(
+      "SELECT * FROM Bookings WHERE trainer_id = :trainerId",
+      {
+        replacements: { trainerId: trainerIdNum },
+        type: db.Sequelize.QueryTypes.SELECT,
+      }
+    );
+
+    // Check for bookings using string comparison
+    const stringComparisonBookings = await db.sequelize.query(
+      "SELECT * FROM Bookings WHERE CAST(trainer_id AS CHAR) = CAST(:trainerId AS CHAR)",
+      {
+        replacements: { trainerId: trainerIdNum },
+        type: db.Sequelize.QueryTypes.SELECT,
+      }
+    );
+
+    // Check all bookings
+    const allBookings = await db.sequelize.query(
+      "SELECT * FROM Bookings LIMIT 10",
+      {
+        type: db.Sequelize.QueryTypes.SELECT,
+      }
+    );
+
+    // Return comprehensive debug data
+    return res.status(200).json({
+      message: "Debug information",
+      success: true,
+      trainer: {
+        id: trainerExists.id,
+        name: trainerExists.user_name,
+        email: trainerExists.user_email,
+        role: trainerExists.user_role,
+      },
+      bookings: {
+        exactMatch: {
+          count: rawBookings.length,
+          results: rawBookings,
+        },
+        stringComparison: {
+          count: stringComparisonBookings.length,
+          results: stringComparisonBookings,
+        },
+        allBookings: {
+          count: allBookings.length,
+          results: allBookings,
+        },
+      },
+    });
+  } catch (error) {
+    console.error("[BookingsController DEBUG] Error:", error);
+    return res.status(500).json({
+      message: "Server error during debug",
+      error: error.message,
+      success: false,
+    });
   }
 };

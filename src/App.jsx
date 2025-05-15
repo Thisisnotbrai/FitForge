@@ -20,7 +20,7 @@ import VerificationTab from "./components/Signup/VerificationTab"; // Import Ver
 import Signin from "./components/Signin/Signin"; // Import Signin component
 import TrainerVerificationModal from "./components/TrainerVerificationModal"; // Import the TrainerVerificationModal
 // Import the actual component files
-import YourTrainer from "./components/Views/Trainee/YourTrainer";
+import YourTrainer from "./components/Views/Trainee/YourTrainer.jsx";
 import Hire from "./components/Views/Trainee/Hire";
 import Progress from "./components/Views/Trainee/Progress";
 import Workout from "./components/Views/Trainee/Workout/Workout"; // Import the new Workout component
