@@ -1,9 +1,8 @@
 /**
- * Config Validator
- *
- * This utility validates that the config.js file exists and has been properly set up
- * by displaying helpful error messages if it's missing or using default values.
- */
+ 
+Config Validator*,
+This utility validates that the config.js file exists and has been properly set up,
+by displaying helpful error messages if it's missing or using default values.*/
 
 import config from "./config.js";
 

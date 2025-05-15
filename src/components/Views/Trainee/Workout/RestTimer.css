@@ -7,9 +7,10 @@
   max-width: 500px;
   margin: 0 auto;
   text-align: center;
-  background-color: #ffffff;
+  background-color: #1B202B !important;
   border-radius: 20px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  color: #fff;
 }
 
 .rest-timer-header {
@@ -20,7 +21,7 @@
 .rest-timer-header h2 {
   font-size: 1.8rem;
   font-weight: 800;
-  color: #2c3e50;
+  color: #fff;
   margin-bottom: 0.75rem;
   letter-spacing: 0.5px;
   position: relative;
@@ -35,18 +36,18 @@
   transform: translateX(-50%);
   width: 50px;
   height: 4px;
-  background: linear-gradient(to right, #3498db, #2980b9);
+  background: linear-gradient(to right, #C97B63, #3498db);
   border-radius: 2px;
 }
 
 .rest-timer-header p {
   font-size: 1.1rem;
-  color: #5f6b7c;
+  color: #b0b8c1;
   margin-top: 1rem;
 }
 
 .rest-timer-header p strong {
-  color: #3498db;
+  color: #C97B63;
   font-weight: 600;
 }
 
@@ -55,6 +56,7 @@
   justify-content: center;
   align-items: center;
   margin-bottom: 2.5rem;
+  color: #fff;
 }
 
 .rest-timer-progress {
@@ -64,13 +66,13 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  box-shadow: 0 10px 30px rgba(52, 152, 219, 0.2);
+  box-shadow: 0 10px 30px rgba(201, 123, 99, 0.18);
   position: relative;
   transition: all 1s ease;
 }
 
 .rest-timer-display {
-  background-color: white;
+  background-color: #23293A;
   border-radius: 50%;
   width: 200px;
   height: 200px;
@@ -81,6 +83,7 @@
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
   position: relative;
   z-index: 2;
+  color: #fff;
 }
 
 .timer-icon {
@@ -100,7 +103,7 @@
 .timer-text {
   font-size: 3.5rem;
   font-weight: 700;
-  color: #2c3e50;
+  color: #fff;
   line-height: 1;
   margin-bottom: 0.5rem;
   transition: transform 0.2s ease;
@@ -115,20 +118,20 @@
 }
 
 .next-exercise-preview {
-  background-color: #f8f9fa;
+  background-color: #23293A;
   padding: 1.25rem;
   border-radius: 12px;
   margin-bottom: 2rem;
   width: 100%;
   max-width: 350px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  border-left: 4px solid #3498db;
+  border-left: 4px solid #C97B63;
 }
 
 .preview-label {
   font-size: 0.8rem;
   font-weight: 600;
-  color: #7f8c8d;
+  color: #b0b8c1;
   margin-bottom: 0.5rem;
   letter-spacing: 1px;
   text-transform: uppercase;
@@ -137,12 +140,12 @@
 .preview-exercise {
   font-size: 1.3rem;
   font-weight: 700;
-  color: #2c3e50;
+  color: #fff;
 }
 
 .skip-rest-btn {
-  background: linear-gradient(135deg, #3498db, #2980b9);
-  color: #ffffff;
+  background: #C97B63;
+  color: #fff;
   border: none;
   padding: 1rem 2rem;
   border-radius: 50px;
@@ -157,6 +160,7 @@
 }
 
 .skip-rest-btn:hover {
+  background: #3498db;
   transform: translateY(-3px);
   box-shadow: 0 12px 20px rgba(52, 152, 219, 0.4);
 }

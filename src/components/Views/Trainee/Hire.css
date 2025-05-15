@@ -6,7 +6,27 @@
 
 .hire-header {
   text-align: center;
-  margin-bottom: 3rem;
+  margin-bottom: 2rem;
+}
+
+.active-partnership-notice {
+  background-color: #f8eeb4;
+  border-left: 4px solid #f4d03f;
+  padding: 1rem 1.5rem;
+  margin-bottom: 2rem;
+  border-radius: 0 8px 8px 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.active-partnership-notice p {
+  margin: 0;
+  color: #7d6608;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.active-partnership-notice strong {
+  color: #5d4c05;
 }
 
 .hire-header h1 {
@@ -187,6 +207,19 @@
   background-color: #2980b9;
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3);
+}
+
+.hire-btn:disabled {
+  background-color: #cbd5e0;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.hire-btn:disabled:hover {
+  background-color: #cbd5e0;
+  transform: none;
+  box-shadow: none;
 }
 
 @media (max-width: 768px) {

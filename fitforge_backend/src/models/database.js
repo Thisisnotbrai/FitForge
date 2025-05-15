@@ -29,6 +29,7 @@ db.Workouts = require("../models/Workouts")(sequelize, DataTypes);
 db.WorkoutHistory = require("../models/WorkoutHistory")(sequelize, DataTypes);
 db.Bookings = require("../models/Bookings")(sequelize, DataTypes);
 db.TraineeWorkout = require("../models/TraineeWorkout")(sequelize, DataTypes);
+db.Partnership = require("../models/Partnership")(sequelize, DataTypes);
 
 // Set up associations
 Object.keys(db).forEach((modelName) => {

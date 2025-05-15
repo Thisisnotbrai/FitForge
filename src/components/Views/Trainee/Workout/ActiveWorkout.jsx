@@ -5,6 +5,7 @@ import ExerciseScreen from "./ExerciseScreen";
 import RestTimer from "./RestTimer";
 import CustomRestTimer from "./CustomRestTimer";
 import WorkoutComplete from "./WorkoutComplete";
+import CircularTimer from "./CircularTimer";
 import "./Workout.css";
 import "./ActiveWorkout.css";
 
@@ -21,6 +22,9 @@ const ActiveWorkout = () => {
   const [workoutStartTime, setWorkoutStartTime] = useState(null);
   const [workoutDuration, setWorkoutDuration] = useState(0);
   const [isUserWorkout, setIsUserWorkout] = useState(false);
+  // New states for set-based timer
+  const [currentSet, setCurrentSet] = useState(1);
+  const [timerKey, setTimerKey] = useState(0);
 
   useEffect(() => {
     const fetchWorkoutDetails = async () => {
@@ -100,6 +104,12 @@ const ActiveWorkout = () => {
     fetchWorkoutDetails();
   }, [id]);
 
+  // Reset set and timerKey when exercise changes
+  useEffect(() => {
+    setCurrentSet(1);
+    setTimerKey(prev => prev + 1);
+  }, [currentExerciseIndex]);
+
   // Update workout duration every minute
   useEffect(() => {
     if (!workoutStartTime || workoutComplete) return;
@@ -111,6 +121,17 @@ const ActiveWorkout = () => {
 
     return () => clearInterval(interval);
   }, [workoutStartTime, workoutComplete]);
+
+  // Set-based timer complete handler
+  const handleTimerComplete = () => {
+    if (currentSet < (workout.exercises[currentExerciseIndex].sets || 1)) {
+      setCurrentSet(currentSet + 1);
+      setTimerKey(prev => prev + 1);
+    } else {
+      setCurrentSet(1);
+      handleExerciseComplete();
+    }
+  };
 
   const handleExerciseComplete = () => {
     if (!workout || !workout.exercises || workout.exercises.length === 0) {
@@ -291,12 +312,22 @@ const ActiveWorkout = () => {
           />
         )
       ) : (
+        currentExercise.work_time ? (
+          <CircularTimer
+            key={timerKey}
+            duration={currentExercise.work_time}
+            onComplete={handleTimerComplete}
+            onNext={handleTimerComplete}
+            label={`Set ${currentSet} of ${currentExercise.sets || 1}`}
+          />
+      ) : (
         <ExerciseScreen
           exercise={currentExercise}
           onComplete={handleExerciseComplete}
           exerciseNumber={currentExerciseIndex + 1}
           totalExercises={workout.exercises.length}
         />
+        )
       )}
     </div>
   );

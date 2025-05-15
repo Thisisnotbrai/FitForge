@@ -1,6 +1,6 @@
 module.exports = (sequelize, DataTypes) => {
-  const Bookings = sequelize.define(
-    "Bookings",
+  const Partnership = sequelize.define(
+    "Partnership",
     {
       trainee_id: {
         type: DataTypes.INTEGER,
@@ -10,24 +10,20 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.INTEGER,
         allowNull: false,
       },
-      date: {
-        type: DataTypes.DATE,
-        allowNull: false,
-        comment: "The date for the booking",
-      },
       start_date: {
         type: DataTypes.DATE,
         allowNull: false,
-        comment: "Full date and time for the start of the booking",
+        defaultValue: DataTypes.NOW,
+        comment: "The date when the partnership began",
       },
       end_date: {
         type: DataTypes.DATE,
-        allowNull: false,
-        comment: "Full date and time for the end of the booking",
+        allowNull: true,
+        comment: "The date when the partnership ended (null if still active)",
       },
       status: {
-        type: DataTypes.ENUM("pending", "confirmed", "cancelled", "completed"),
-        defaultValue: "pending",
+        type: DataTypes.ENUM("active", "paused", "terminated"),
+        defaultValue: "active",
       },
       notes: {
         type: DataTypes.TEXT,
@@ -43,22 +39,28 @@ module.exports = (sequelize, DataTypes) => {
       },
     },
     {
-      tableName: "Bookings",
+      tableName: "Partnerships",
       freezeTableName: true,
+      indexes: [
+        {
+          unique: true,
+          fields: ["trainee_id", "trainer_id"],
+        },
+      ],
     }
   );
 
-  Bookings.associate = function (models) {
-    Bookings.belongsTo(models.User, {
+  Partnership.associate = function (models) {
+    Partnership.belongsTo(models.User, {
       foreignKey: "trainee_id",
       as: "trainee",
     });
 
-    Bookings.belongsTo(models.User, {
+    Partnership.belongsTo(models.User, {
       foreignKey: "trainer_id",
       as: "trainer",
     });
   };
 
-  return Bookings;
+  return Partnership;
 };

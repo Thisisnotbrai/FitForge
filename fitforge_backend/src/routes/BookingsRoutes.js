@@ -14,6 +14,9 @@ router.get("/trainee/:traineeId", bookingController.getBookingsByTrainee);
 // Get bookings by trainer ID
 router.get("/trainer/:trainerId", bookingController.getBookingsByTrainer);
 
+// Debug endpoint to verify bookings directly from database
+router.get("/debug/trainer/:trainerId", bookingController.debugTrainerBookings);
+
 // Update booking status
 router.put("/:bookingId/status", bookingController.updateBookingStatus);
 

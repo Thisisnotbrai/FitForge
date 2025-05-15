@@ -430,14 +430,14 @@ const WorkoutDetail = () => {
                         setShowExerciseModal(true);
                       }}
                     >
-                      <i className="edit-icon"></i>
+                      <span className="edit-icon">✎</span>
                     </button>
                     <button 
                       className="btn-delete-exercise"
                       aria-label="Delete exercise"
                       onClick={() => handleDeleteExercise(exercise.id)}
                     >
-                      <i className="delete-icon">×</i>
+                      <span className="delete-icon">×</span>
                     </button>
                   </div>
                 )}

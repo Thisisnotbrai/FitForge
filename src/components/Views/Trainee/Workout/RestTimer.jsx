@@ -1,105 +1,208 @@
 import { useState, useEffect } from "react";
-import PropTypes from "prop-types"; // Import PropTypes
-import "./RestTimer.css";
+import PropTypes from "prop-types";
+
+const formatTime = (time) => {
+  if (time < 60) return `${time}`;
+  const minutes = Math.floor(time / 60);
+  const seconds = time % 60;
+  return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
+};
+
+const TimerIcon = () => (
+  <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+    <circle cx="12" cy="12" r="10" stroke="#3498db" strokeWidth="2" />
+    <path d="M12 6v6l4 2" stroke="#3498db" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
 
 const RestTimer = ({ seconds, nextExercise, onComplete }) => {
   const [timeLeft, setTimeLeft] = useState(seconds);
-  const [isAnimating, setIsAnimating] = useState(false);
 
   useEffect(() => {
     if (timeLeft <= 0) {
       onComplete();
       return;
     }
-
     const timer = setInterval(() => {
       setTimeLeft((prev) => prev - 1);
-      setIsAnimating(true);
-      setTimeout(() => setIsAnimating(false), 500);
     }, 1000);
-
     return () => clearInterval(timer);
   }, [timeLeft, onComplete]);
 
-  // Format time to display minutes and seconds if needed
-  const formatTime = (time) => {
-    if (time < 60) return `${time}`;
-
-    const minutes = Math.floor(time / 60);
-    const seconds = time % 60;
-    return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
-  };
-
-  // Calculate progress percentage for the circular progress
-  const calculateProgress = () => {
-    return ((seconds - timeLeft) / seconds) * 100;
-  };
+  // Circular progress
+  const radius = 90;
+  const stroke = 14;
+  const normalizedRadius = radius - stroke / 2;
+  const circumference = normalizedRadius * 2 * Math.PI;
+  const progress = ((seconds - timeLeft) / seconds) * circumference;
 
   return (
-    <div className="rest-timer-container">
-      <div className="rest-timer-header">
-        <h2>REST TIME</h2>
-        <p>
-          Get ready for <strong>{nextExercise}</strong>
-        </p>
+    <div style={{
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      justifyContent: "center",
+      background: "#f7f9fb"
+    }}>
+      <div style={{
+        background: "#1B202B",
+        borderRadius: 12,
+        boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+        padding: "2.2rem 2rem 2rem 2rem",
+        maxWidth: 370,
+        width: "100%",
+        margin: "1.2rem auto 0.8rem auto",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+      }}>
+        <div style={{
+          fontWeight: 800,
+          fontSize: 22,
+          color: "#fff",
+          marginBottom: 8,
+          letterSpacing: 1,
+          textTransform: "uppercase",
+          textAlign: "center",
+          fontFamily: "'Montserrat', 'Poppins', 'Segoe UI', Arial, sans-serif",
+        }}>
+          REST TIME
+        </div>
+        <div style={{
+          color: "#b0b8c1",
+          fontSize: 16,
+          marginBottom: 18,
+          textAlign: "center",
+          fontFamily: "'Montserrat', 'Poppins', 'Segoe UI', Arial, sans-serif",
+        }}>
+          Get ready for <span style={{ color: "#C97B63", fontWeight: 700 }}>{nextExercise}</span>
       </div>
-
-      <div className="rest-timer">
-        <div
-          className="rest-timer-progress"
+        <div style={{
+          position: "relative",
+          width: 220,
+          height: 220,
+          marginBottom: 18,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}>
+          <svg width={220} height={220}>
+            <circle
+              stroke="#23293A"
+              fill="none"
+              strokeWidth={stroke}
+              r={normalizedRadius}
+              cx={110}
+              cy={110}
+            />
+            <circle
+              stroke="#3498db"
+              fill="none"
+              strokeWidth={stroke}
+              strokeLinecap="round"
+              strokeDasharray={circumference}
+              strokeDashoffset={circumference - progress}
+              r={normalizedRadius}
+              cx={110}
+              cy={110}
           style={{
-            background: `conic-gradient(
-              #3498db ${calculateProgress()}%, 
-              #ecf0f1 ${calculateProgress()}% 100%
-            )`,
-          }}
-        >
-          <div className="rest-timer-display">
-            <div className="timer-icon">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                width="28"
-                height="28"
-                fill="#3498db"
-              >
-                <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z" />
+                transition: "stroke-dashoffset 1s linear",
+                filter: "drop-shadow(0 2px 8px rgba(52,152,219,0.18))"
+              }}
+            />
               </svg>
-            </div>
-            <div className={`timer-text ${isAnimating ? "pulse" : ""}`}>
-              {formatTime(timeLeft)}
-            </div>
-            <div className="timer-label">seconds</div>
+          <div style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            userSelect: "none",
+            pointerEvents: "none",
+          }}>
+            <span style={{ marginBottom: 8 }}><TimerIcon /></span>
+            <span style={{
+              fontSize: 48,
+              fontWeight: 800,
+              color: "#fff",
+              fontFamily: "'Montserrat', 'Poppins', 'Segoe UI', Arial, sans-serif",
+              letterSpacing: 1,
+              lineHeight: 1.1,
+              textShadow: "0 2px 8px rgba(0,0,0,0.10)",
+            }}>{formatTime(timeLeft)}</span>
+            <span style={{
+              fontSize: 16,
+              color: "#b0b8c1",
+              fontWeight: 600,
+              letterSpacing: 2,
+              marginTop: 2,
+              fontFamily: "'Montserrat', 'Poppins', 'Segoe UI', Arial, sans-serif",
+            }}>SECONDS</span>
           </div>
         </div>
+        <div style={{
+          background: "#23293A",
+          borderRadius: 18,
+          boxShadow: "0 2px 12px rgba(28,32,43,0.10)",
+          padding: "1.2rem 1.5rem 1.2rem 1.5rem",
+          width: "100%",
+          margin: "0.5rem 0 1.2rem 0",
+          textAlign: "center",
+          borderLeft: "4px solid #C97B63",
+        }}>
+          <div style={{
+            fontSize: 13,
+            color: "#b0b8c1",
+            fontWeight: 700,
+            letterSpacing: 1,
+            marginBottom: 4,
+            textTransform: "uppercase",
+          }}>COMING UP NEXT</div>
+          <div style={{
+            fontSize: 20,
+            color: "#fff",
+            fontWeight: 800,
+            letterSpacing: 1,
+            textTransform: "lowercase",
+          }}>{nextExercise}</div>
       </div>
-
-      <div className="next-exercise-preview">
-        <div className="preview-label">COMING UP NEXT</div>
-        <div className="preview-exercise">{nextExercise}</div>
-      </div>
-
-      <button onClick={onComplete} className="skip-rest-btn">
-        <span>Skip Rest</span>
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          width="20"
-          height="20"
-          fill="currentColor"
+        <button
+          onClick={onComplete}
+          style={{
+            background: "#3498db",
+            color: "#fff",
+            border: "none",
+            borderRadius: 24,
+            fontWeight: 700,
+            fontSize: 18,
+            cursor: "pointer",
+            transition: "all 0.2s",
+            boxShadow: "0 2px 8px rgba(52,152,219,0.12)",
+            outline: "none",
+            fontFamily: "'Montserrat', 'Poppins', 'Segoe UI', Arial, sans-serif",
+            padding: "1rem 2.5rem",
+            marginTop: 8,
+            display: "flex",
+            alignItems: "center",
+            gap: 10,
+          }}
         >
-          <path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z" />
-        </svg>
+          Skip Rest
+          <svg style={{ marginLeft: 8 }} width="20" height="20" fill="#fff" viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
       </button>
+      </div>
     </div>
   );
 };
 
-// Define PropTypes for validation
 RestTimer.propTypes = {
-  seconds: PropTypes.number.isRequired, // Must be a number and required
-  nextExercise: PropTypes.string.isRequired, // Must be a string and required
-  onComplete: PropTypes.func.isRequired, // Must be a function and required
+  seconds: PropTypes.number.isRequired,
+  nextExercise: PropTypes.string.isRequired,
+  onComplete: PropTypes.func.isRequired,
 };
 
 export default RestTimer;

@@ -1,10 +1,11 @@
 const db = require("../models/database");
 const { Bookings, User, TrainerInfo } = db;
+const partnershipController = require("./PartnershipController");
 
 // Create a new booking
 exports.createBooking = async (req, res) => {
   try {
-    const { trainee_id, trainer_id, date, start_time, end_time, notes } =
+    const { trainee_id, trainer_id, date, start_date, end_date, notes } =
       req.body;
 
     // Validate that both users exist
@@ -30,6 +31,28 @@ exports.createBooking = async (req, res) => {
         .json({ message: "Trainer not found or not approved" });
     }
 
+    // Check if trainee already has an active partnership with a different trainer
+    const activePartnerships = await db.Partnership.findAll({
+      where: {
+        trainee_id,
+        status: "active",
+      },
+    });
+
+    // If there's an active partnership with a different trainer, reject the booking
+    if (activePartnerships && activePartnerships.length > 0) {
+      const hasAnotherTrainer = activePartnerships.some(
+        (partnership) => partnership.trainer_id !== parseInt(trainer_id)
+      );
+
+      if (hasAnotherTrainer) {
+        return res.status(403).json({
+          message:
+            "You already have an active partnership with a different trainer. You can only book sessions with your current trainer.",
+        });
+      }
+    }
+
     // Check if trainer is available on that day
     const bookingDate = new Date(date);
     const dayOfWeek = bookingDate.toLocaleString("en-us", { weekday: "long" });
@@ -43,11 +66,30 @@ exports.createBooking = async (req, res) => {
       });
     }
 
+    // Parse the start_date and end_date to extract hours for availability check
+    const startDateTime = new Date(start_date);
+    const endDateTime = new Date(end_date);
+
+    // Format hours for comparison (assuming trainer's available_hours are in HH:MM format)
+    const bookingStartHour =
+      startDateTime.getHours() +
+      ":" +
+      (startDateTime.getMinutes() < 10 ? "0" : "") +
+      startDateTime.getMinutes();
+    const bookingEndHour =
+      endDateTime.getHours() +
+      ":" +
+      (endDateTime.getMinutes() < 10 ? "0" : "") +
+      endDateTime.getMinutes();
+
     // Check if the requested time is within trainer's available hours
     const trainerStartTime = trainer.trainerInfo.available_hours_from;
     const trainerEndTime = trainer.trainerInfo.available_hours_to;
 
-    if (start_time < trainerStartTime || end_time > trainerEndTime) {
+    if (
+      bookingStartHour < trainerStartTime ||
+      bookingEndHour > trainerEndTime
+    ) {
       return res.status(400).json({
         message: `Trainer is only available from ${trainerStartTime} to ${trainerEndTime}`,
       });
@@ -57,20 +99,23 @@ exports.createBooking = async (req, res) => {
     const existingBooking = await Bookings.findOne({
       where: {
         trainer_id,
-        date,
         status: ["pending", "confirmed"],
         // Either starts or ends during the requested time slot
         [db.Sequelize.Op.or]: [
           {
-            start_time: { [db.Sequelize.Op.between]: [start_time, end_time] },
+            start_date: {
+              [db.Sequelize.Op.between]: [start_date, end_date],
+            },
           },
           {
-            end_time: { [db.Sequelize.Op.between]: [start_time, end_time] },
+            end_date: {
+              [db.Sequelize.Op.between]: [start_date, end_date],
+            },
           },
           {
             [db.Sequelize.Op.and]: [
-              { start_time: { [db.Sequelize.Op.lte]: start_time } },
-              { end_time: { [db.Sequelize.Op.gte]: end_time } },
+              { start_date: { [db.Sequelize.Op.lte]: start_date } },
+              { end_date: { [db.Sequelize.Op.gte]: end_date } },
             ],
           },
         ],
@@ -88,8 +133,8 @@ exports.createBooking = async (req, res) => {
       trainee_id,
       trainer_id,
       date,
-      start_time,
-      end_time,
+      start_date,
+      end_date,
       notes,
       status: "pending",
     });
@@ -126,7 +171,7 @@ exports.getBookingsByTrainee = async (req, res) => {
       ],
       order: [
         ["date", "DESC"],
-        ["start_time", "ASC"],
+        ["start_date", "ASC"],
       ],
     });
 
@@ -155,7 +200,7 @@ exports.getBookingsByTrainer = async (req, res) => {
       ],
       order: [
         ["date", "DESC"],
-        ["start_time", "ASC"],
+        ["start_date", "ASC"],
       ],
     });
 
@@ -184,9 +229,20 @@ exports.updateBookingStatus = async (req, res) => {
       return res.status(404).json({ message: "Booking not found" });
     }
 
-    // Update status
+    // Store the old status to check if it's actually changing
+    const oldStatus = booking.status;
+
+    // Update booking
     booking.status = status;
     await booking.save();
+
+    // If status has changed, manage the partnership
+    if (oldStatus !== status) {
+      await partnershipController.managePartnershipFromBookingStatus(
+        bookingId,
+        status
+      );
+    }
 
     return res.status(200).json(booking);
   } catch (error) {
@@ -319,3 +375,102 @@ const getBookingTrend = async () => {
     return [];
   }
 };
+// Debug endpoint to directly check bookings in database
+exports.debugTrainerBookings = async (req, res) => {
+  try {
+    const { trainerId } = req.params;
+
+    console.log(
+      `[BookingsController DEBUG] Checking bookings for trainer ID: ${trainerId}`
+    );
+
+    // Convert ID to number
+    const trainerIdNum = parseInt(trainerId, 10);
+
+    if (isNaN(trainerIdNum)) {
+      return res.status(400).json({
+        message: "Invalid trainer ID format",
+        success: false,
+      });
+    }
+
+    // First check if the trainer exists
+    const trainerExists = await User.findOne({
+      where: { id: trainerIdNum, user_role: "trainer" },
+    });
+
+    if (!trainerExists) {
+      return res.status(404).json({
+        message: "Trainer not found",
+        success: false,
+      });
+    }
+
+    // Debug output about the trainer
+    console.log("[BookingsController DEBUG] Found trainer:", {
+      id: trainerExists.id,
+      name: trainerExists.user_name,
+      email: trainerExists.user_email,
+      role: trainerExists.user_role,
+    });
+
+    // Check for bookings using direct SQL query
+    const rawBookings = await db.sequelize.query(
+      "SELECT * FROM Bookings WHERE trainer_id = :trainerId",
+      {
+        replacements: { trainerId: trainerIdNum },
+        type: db.Sequelize.QueryTypes.SELECT,
+      }
+    );
+
+    // Check for bookings using string comparison
+    const stringComparisonBookings = await db.sequelize.query(
+      "SELECT * FROM Bookings WHERE CAST(trainer_id AS CHAR) = CAST(:trainerId AS CHAR)",
+      {
+        replacements: { trainerId: trainerIdNum },
+        type: db.Sequelize.QueryTypes.SELECT,
+      }
+    );
+
+    // Check all bookings
+    const allBookings = await db.sequelize.query(
+      "SELECT * FROM Bookings LIMIT 10",
+      {
+        type: db.Sequelize.QueryTypes.SELECT,
+      }
+    );
+
+    // Return comprehensive debug data
+    return res.status(200).json({
+      message: "Debug information",
+      success: true,
+      trainer: {
+        id: trainerExists.id,
+        name: trainerExists.user_name,
+        email: trainerExists.user_email,
+        role: trainerExists.user_role,
+      },
+      bookings: {
+        exactMatch: {
+          count: rawBookings.length,
+          results: rawBookings,
+        },
+        stringComparison: {
+          count: stringComparisonBookings.length,
+          results: stringComparisonBookings,
+        },
+        allBookings: {
+          count: allBookings.length,
+          results: allBookings,
+        },
+      },
+    });
+  } catch (error) {
+    console.error("[BookingsController DEBUG] Error:", error);
+    return res.status(500).json({
+      message: "Server error during debug",
+      error: error.message,
+      success: false,
+    });
+  }
+}

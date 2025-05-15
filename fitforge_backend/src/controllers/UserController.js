@@ -415,3 +415,144 @@ exports.suspendUser = async (req, res) => {
     });
   }
 };
+
+exports.getTrainerById = async (req, res) => {
+  try {
+    const trainerId = req.params.id;
+    console.log(`Fetching trainer profile for ID: ${trainerId}`);
+
+    if (!trainerId) {
+      return send.sendErrorMessage(res, 400, "Trainer ID is required");
+    }
+
+    // Find the trainer by ID with fewer restrictions to help debugging
+    const trainer = await User.findOne({
+      where: {
+        id: trainerId,
+        user_role: "trainer",
+      },
+      attributes: [
+        "id",
+        "user_name",
+        "user_email",
+        "user_role",
+        "is_verified",
+        "is_approved",
+      ],
+      include: [
+        {
+          model: db.TrainerInfo,
+          as: "trainerInfo",
+          attributes: [
+            "specialization",
+            "experience",
+            "hourly_rate",
+            "available_days",
+            "available_hours_from",
+            "available_hours_to",
+            "bio",
+          ],
+        },
+      ],
+    });
+
+    if (!trainer) {
+      console.log(`No trainer found with ID: ${trainerId}`);
+      return send.sendErrorMessage(res, 404, "Trainer not found");
+    }
+
+    console.log(
+      `Trainer found: ${trainer.user_name}, approved: ${trainer.is_approved}, verified: ${trainer.is_verified}`
+    );
+
+    // If trainer is not approved, return a specific message but still include the data
+    if (!trainer.is_approved) {
+      return send.sendResponseMessage(
+        res,
+        403,
+        trainer,
+        "Trainer account is pending approval"
+      );
+    }
+
+    return send.sendResponseMessage(
+      res,
+      200,
+      trainer,
+      "Trainer retrieved successfully"
+    );
+  } catch (error) {
+    console.error("Error getting trainer by ID:", error);
+    return send.sendErrorMessage(res, 500, error);
+  }
+};
+
+// Get current user profile
+exports.getUserProfile = async (req, res) => {
+  try {
+    // Get user ID from authenticated token
+    const userId = req.user.id;
+    const userRole = req.user.role;
+
+    console.log("User profile request:", { userId, userRole, user: req.user });
+
+    if (!userId) {
+      return send.sendResponseMessage(res, 401, null, "Not authenticated");
+    }
+
+    // Find the user by ID
+    const user = await User.findOne({
+      where: { id: userId },
+      attributes: [
+        "id",
+        "user_name",
+        "user_email",
+        "user_role",
+        "is_verified",
+        "is_approved",
+      ],
+    });
+
+    if (!user) {
+      return send.sendResponseMessage(res, 404, null, "User not found");
+    }
+
+    console.log("Found user:", user.dataValues);
+
+    // For trainers, check if they're approved
+    if (user.user_role === "trainer" && !user.is_approved) {
+      return send.sendResponseMessage(
+        res,
+        403,
+        {
+          id: user.id,
+          name: user.user_name,
+          email: user.user_email,
+          role: user.user_role,
+          is_verified: user.is_verified,
+          is_approved: user.is_approved,
+        },
+        "Trainer account is pending approval"
+      );
+    }
+
+    // Return the user profile
+    return send.sendResponseMessage(
+      res,
+      200,
+      {
+        id: user.id,
+        name: user.user_name,
+        email: user.user_email,
+        role: user.user_role,
+        is_verified: user.is_verified,
+        is_approved: user.is_approved,
+      },
+      "User profile retrieved successfully"
+    );
+  } catch (error) {
+    console.error("Error getting user profile:", error);
+    return send.sendErrorMessage(res, 500, error);
+  }
+}
+
