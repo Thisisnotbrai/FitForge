@@ -34,4 +34,20 @@ router.get(
   userController.getTrainees
 );
 
+// Admin Analytics Routes
+router.get(
+  "/stats",
+  authMiddleware.authenticateToken,
+  authMiddleware.isAdmin,
+  userController.getUserStats
+);
+
+// Admin User Management Routes
+router.put(
+  "/suspend/:userId",
+  authMiddleware.authenticateToken,
+  authMiddleware.isAdmin,
+  userController.suspendUser
+);
+
 module.exports = router;

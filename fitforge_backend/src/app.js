@@ -38,6 +38,7 @@ const workoutRoutes = require("./routes/WorkoutRoutes");
 const trainerinfoRoutes = require("./routes/TrainerInfoRoutes");
 const bookingsRoutes = require("./routes/BookingsRoutes");
 const traineeWorkoutRoutes = require("./routes/TraineeWorkoutRoutes");
+const indexRoutes = require("./routes/index"); // Admin routes
 
 app.use("/users", userRoutes);
 app.use("/exercises", exerciseRoutes);
@@ -45,6 +46,7 @@ app.use("/workouts", workoutRoutes);
 app.use("/trainerinfo", trainerinfoRoutes);
 app.use("/booking", bookingsRoutes);
 app.use("/", traineeWorkoutRoutes); // Using root path since routes have their own prefixes
+app.use("/", indexRoutes); // Admin routes
 
 // eslint-disable-next-line no-unused-vars
 app.use((req, res, next) => {

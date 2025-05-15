@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const bookingController = require("../controllers/BookingsController");
+const authMiddleware = require("../middlewares/authMiddleware");
 
 // Middleware to protect routes
 
@@ -18,5 +19,13 @@ router.put("/:bookingId/status", bookingController.updateBookingStatus);
 
 // Delete booking
 router.delete("/:bookingId", bookingController.deleteBooking);
+
+// Admin Analytics Routes
+router.get(
+  "/stats",
+  authMiddleware.authenticateToken,
+  authMiddleware.isAdmin,
+  bookingController.getBookingStats
+);
 
 module.exports = router;

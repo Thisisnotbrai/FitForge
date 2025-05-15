@@ -273,3 +273,145 @@ exports.getTrainees = async (req, res) => {
     return send.sendErrorMessage(res, 500, error);
   }
 };
+
+// Get User Analytics for Admin Dashboard
+exports.getUserStats = async (req, res) => {
+  try {
+    // Count total users
+    const totalUsers = await getUserCount();
+    
+    // Count trainees
+    const traineeCount = await getUserCount('trainee');
+    
+    // Count trainers
+    const trainerCount = await getUserCount('trainer');
+    
+    // Count pending trainers
+    const pendingCount = await getUserCount('trainer', false);
+    
+    // Get registration trend data (last 6 months)
+    const registrationTrend = await getRegistrationTrend();
+    
+    return res.status(200).json({
+      success: true,
+      message: "User statistics retrieved successfully",
+      data: {
+        totalUsers,
+        traineeCount,
+        trainerCount,
+        pendingCount,
+        registrationTrend
+      }
+    });
+  } catch (error) {
+    console.error("Error retrieving user stats:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to retrieve user statistics",
+      error: error.message
+    });
+  }
+};
+
+// Helper function to count users
+const getUserCount = async (role, isApproved) => {
+  const query = {};
+  
+  if (role) {
+    query.user_role = role;
+  }
+  
+  if (isApproved !== undefined) {
+    query.is_approved = isApproved;
+  }
+  
+  try {
+    const count = await User.count({
+      where: query
+    });
+    
+    return count;
+  } catch (error) {
+    console.error("Error counting users:", error);
+    return 0;
+  }
+};
+
+// Helper function to get registration trend data
+const getRegistrationTrend = async () => {
+  try {
+    // Get registration counts for last 6 months
+    const { Sequelize } = require('../models/database');
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+    
+    // Simplified approach using JS date processing
+    const users = await User.findAll({
+      where: {
+        created_at: {
+          [Sequelize.Op.gte]: sixMonthsAgo
+        }
+      },
+      attributes: ['created_at'],
+      order: [['created_at', 'ASC']]
+    });
+    
+    // Process users into monthly buckets
+    const monthlyData = {};
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    
+    users.forEach(user => {
+      const date = new Date(user.created_at);
+      const monthName = months[date.getMonth()];
+      if (!monthlyData[monthName]) {
+        monthlyData[monthName] = 0;
+      }
+      monthlyData[monthName]++;
+    });
+    
+    // Convert to array format
+    const trend = Object.keys(monthlyData).map(month => ({
+      date: month,
+      count: monthlyData[month]
+    }));
+    
+    return trend;
+  } catch (error) {
+    console.error("Error getting registration trend:", error);
+    return [];
+  }
+};
+
+// Suspend a user (trainer or trainee)
+exports.suspendUser = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    
+    // Check if user exists
+    const existingUser = await User.findOne({ where: { id: userId } });
+    
+    if (!existingUser) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found"
+      });
+    }
+    
+    // Update user status to inactive
+    existingUser.is_active = false;
+    await existingUser.save();
+    
+    return res.status(200).json({
+      success: true,
+      message: "User suspended successfully",
+      data: existingUser
+    });
+  } catch (error) {
+    console.error("Error suspending user:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to suspend user",
+      error: error.message
+    });
+  }
+};
