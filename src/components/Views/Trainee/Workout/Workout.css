@@ -1,17 +1,17 @@
 :root {
-  --primary-color: #3498db;
-  --primary-dark: #2980b9;
+  --primary-color: #1B202B;
+  --primary-dark: #23293A;
   --success-color: #27ae60;
   --danger-color: #e74c3c;
-  --text-primary: #2c3e50;
-  --text-secondary: #5f6b7c;
-  --text-tertiary: #7f8c8d;
-  --bg-light: #f8f9fa;
-  --bg-card: #ffffff;
-  --border-color: #eaeaea;
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
-  --shadow-md: 0 5px 15px rgba(0, 0, 0, 0.1);
-  --shadow-lg: 0 8px 25px rgba(0, 0, 0, 0.15);
+  --accent-color: #C97B63;
+  --text-primary: #fff;
+  --text-secondary: #b0b8c1;
+  --bg-light: #23293A;
+  --bg-card: #23293A;
+  --border-color: #C97B63;
+  --shadow-sm: 0 2px 8px rgba(25, 32, 43, 0.12);
+  --shadow-md: 0 5px 15px rgba(25, 32, 43, 0.18);
+  --shadow-lg: 0 8px 25px rgba(25, 32, 43, 0.22);
   --radius-sm: 6px;
   --radius-md: 10px;
   --radius-lg: 20px;
@@ -40,16 +40,17 @@ h1,
 h2,
 h3,
 h4 {
-  color: #2c3e50;
+  color: var(--text-primary);
   margin-bottom: 1rem;
 }
 
 /* Card styles */
 .workout-card {
-  background-color: white;
+  background-color: var(--bg-card);
+  color: var(--text-primary);
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(25, 32, 43, 0.25);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   margin-bottom: 1.5rem;
 }
@@ -61,8 +62,8 @@ h4 {
 
 .workout-tag {
   display: inline-block;
-  background-color: #3498db;
-  color: white;
+  background-color: var(--accent-color);
+  color: var(--text-primary);
   padding: 0.3rem 0.8rem;
   border-radius: 30px;
   font-size: 0.8rem;
@@ -83,8 +84,8 @@ h4 {
 .btn-complete-set,
 .btn-finish,
 .btn-confirm {
-  background-color: #3498db;
-  color: white;
+  background-color: var(--accent-color);
+  color: var(--text-primary);
   border: none;
   padding: 0.8rem 1.5rem;
   border-radius: 6px;
@@ -2914,4 +2915,81 @@ input:checked + .toggle-label:before {
   .modal-footer button {
     width: 100%;
   }
+}
+
+.premade-workouts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 2rem;
+  margin-bottom: 2.5rem;
+}
+
+.premade-workout-card {
+  position: relative;
+  min-height: 220px;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background-size: cover;
+  background-position: center;
+  box-shadow: var(--shadow-md);
+  display: flex;
+  align-items: flex-end;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.premade-workout-card:hover {
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: var(--shadow-lg);
+}
+
+.premade-card-content {
+  color: #fff;
+  padding: 2rem 1.5rem 1.5rem 1.5rem;
+  width: 100%;
+  background: linear-gradient(0deg, rgba(44,62,80,0.7) 40%, rgba(44,62,80,0.1) 100%);
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+}
+
+.premade-badge {
+  display: inline-block;
+  background: var(--primary-color);
+  color: #fff;
+  font-weight: 700;
+  border-radius: 20px;
+  padding: 0.3em 1em;
+  font-size: 0.9em;
+  margin-bottom: 0.7em;
+  letter-spacing: 0.5px;
+}
+.premade-badge.challenge { background: var(--success-color); }
+.premade-badge.workout { background: var(--primary-dark); }
+
+.premade-card-content h3 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0 0 0.7em 0;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.18);
+}
+
+.premade-meta {
+  display: flex;
+  gap: 1.5em;
+  font-size: 1.1em;
+  margin-bottom: 1.2em;
+  font-weight: 500;
+}
+
+.btn-premade-start {
+  background: var(--primary-color);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 0.7em 1.5em;
+  font-size: 1em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+.btn-premade-start:hover {
+  background: var(--primary-dark);
 }

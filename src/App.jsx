@@ -8,9 +8,18 @@ import Features from "./components/LandingPage/Features";
 import Footer from "./components/LandingPage/Footer";
 import BackToTopButton from "./components/LandingPage/BackToTopButton";
 import Dashboard from "./components/Views/Trainee/Dashboard.jsx";
-import TrainerDashboard from "./components/Views/Trainer/TrainerDashboard"; // Import the TrainerDashboard
-import UserProfile from "./components/Views/Trainee/UserProfile"; // Import the UserProfile component
+import TrainerDashboard from "./components/Views/Trainer/TrainerDashboard";
+import UserProfile from "./components/Views/Trainee/UserProfile";
 import ProtectedRoute from "./components/Views/ProtectedRoute";
+import AdminProtectedRoute from "./components/Views/AdminProtectedRoute";
+import AdminSignin from "./components/Views/Admin/AdminSignin";
+import AdminDashboard from "./components/Views/Admin/AdminDashboard";
+import DashboardLayout from "./components/Views/DashboardLayout";
+import Signup from "./components/Signup/Signup";
+import VerificationTab from "./components/Signup/VerificationTab";
+import Signin from "./components/Signin/Signin";
+import TrainerVerificationModal from "./components/TrainerVerificationModal";
+import YourTrainer from "./components/Views/Trainee/YourTrainer";
 import AdminProtectedRoute from "./components/Views/AdminProtectedRoute"; // Import the AdminProtectedRoute
 import AdminSignin from "./components/Views/Admin/AdminSignin"; // Import the AdminSignin component
 import AdminDashboard from "./components/Views/Admin/AdminDashboard"; // Import the AdminDashboard component
@@ -23,15 +32,14 @@ import TrainerVerificationModal from "./components/TrainerVerificationModal"; //
 import YourTrainer from "./components/Views/Trainee/YourTrainer.jsx";
 import Hire from "./components/Views/Trainee/Hire";
 import Progress from "./components/Views/Trainee/Progress";
-import Workout from "./components/Views/Trainee/Workout/Workout"; // Import the new Workout component
-import WorkoutDetail from "./components/Views/Trainee/Workout/WorkoutDetail"; // Import WorkoutDetail
-import WorkoutList from "./components/Views/Trainee/Workout/WorkoutList"; // Import WorkoutList
-import ActiveWorkout from "./components/Views/Trainee/Workout/ActiveWorkout"; // Import ActiveWorkout
-import Nutrition from "./components/Views/Trainee/Nutrition/Nutrition"; // Import the Nutrition component
+import Workout from "./components/Views/Trainee/Workout/Workout";
+import WorkoutDetail from "./components/Views/Trainee/Workout/WorkoutDetail";
+import WorkoutList from "./components/Views/Trainee/Workout/WorkoutList";
+import ActiveWorkout from "./components/Views/Trainee/Workout/ActiveWorkout";
+import Nutrition from "./components/Views/Trainee/Nutrition/Nutrition";
 import YourTrainees from "./components/Views/Trainer/YourTrainees";
 import "./App.css";
 
-// Component to check if user is already verified and redirect accordingly
 const VerificationRoute = () => {
   const userString = localStorage.getItem("user");
 
@@ -42,8 +50,6 @@ const VerificationRoute = () => {
       user.is_verified
     );
 
-    // If user is already logged in and verified, redirect to dashboard
-    // Only check if explicitly true (not undefined, empty, etc.)
     if (user.is_verified === true) {
       if (user.role === "trainee") {
         return <Navigate to="/Dashboard" replace />;
@@ -59,7 +65,6 @@ const VerificationRoute = () => {
 function App() {
   return (
     <Routes>
-      {/* Landing Page Route */}
       <Route
         path="/"
         element={
@@ -77,31 +82,26 @@ function App() {
         }
       />
 
-      {/* Authentication Routes */}
       <Route path="/signup" element={<Signup />} />
       <Route path="/login" element={<Signin />} />
       <Route path="/verify" element={<VerificationRoute />} />
 
-      {/* Admin Routes */}
       <Route path="/admin/login" element={<AdminSignin />} />
       <Route element={<AdminProtectedRoute />}>
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
       </Route>
 
-      {/* Redirect any onboarding attempts to Dashboard */}
       <Route
         path="/onboarding"
         element={<Navigate to="/Dashboard" replace />}
       />
 
-      {/* Protected Dashboard Route */}
       <Route element={<ProtectedRoute />}>
         <Route element={<DashboardLayout />}>
           <Route path="/Dashboard" element={<Dashboard />} />
           <Route path="/TrainerDashboard" element={<TrainerDashboard />} />
           <Route path="/profile" element={<UserProfile />} />
 
-          {/* Trainee-only route */}
           <Route element={<ProtectedRoute allowedRoles={["trainee"]} />}>
             <Route path="/your-trainer" element={<YourTrainer />} />
             <Route path="/hire" element={<Hire />} />
@@ -113,12 +113,9 @@ function App() {
             <Route path="/nutrition" element={<Nutrition />} />
           </Route>
 
-          {/* Trainer-only route */}
           <Route element={<ProtectedRoute allowedRoles={["trainer"]} />}>
             <Route path="/your-trainee" element={<YourTrainees />} />
           </Route>
-
-          {/* Shared routes */}
         </Route>
       </Route>
     </Routes>
