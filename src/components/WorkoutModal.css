@@ -23,7 +23,8 @@
 }
 
 .workoutmodal-content {
-  background-color: white;
+  background-color: #23293A;
+  color: #fff;
   border-radius: 24px;
   padding: 0;
   width: 95%;
@@ -76,8 +77,8 @@
 
 .workoutmodal-left {
   width: 42%;
-  background: linear-gradient(135deg, #e74c3c, #c0392b);
-  color: white;
+  background: linear-gradient(135deg, #C97B63, #1B202B);
+  color: #fff;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -156,8 +157,8 @@
 }
 
 .workoutmodal-start-btn {
-  background-color: white;
-  color: #c0392b;
+  background-color: #C97B63;
+  color: #fff;
   font-weight: 700;
   font-size: 1rem;
   border: none;
@@ -213,6 +214,8 @@
 }
 
 .workoutmodal-start-btn:hover {
+  background-color: #3498db;
+  color: #fff;
   transform: translateY(-4px);
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
 }
