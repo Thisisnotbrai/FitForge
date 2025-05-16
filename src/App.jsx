@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import Header from "./components/LandingPage/Header";
 import Hero from "./components/LandingPage/Hero";
 import About from "./components/LandingPage/About";
@@ -53,6 +53,9 @@ const VerificationRoute = () => {
 };
 
 function App() {
+  const location = useLocation();
+  const isAdminRoute = location.pathname.includes('/admin');
+  
   return (
     <Routes>
       <Route
@@ -66,7 +69,7 @@ function App() {
             <FAQ />
             <Features />
             <Footer />
-            <BackToTopButton />
+            {!isAdminRoute && <BackToTopButton />}
             <TrainerVerificationModal />
           </div>
         }

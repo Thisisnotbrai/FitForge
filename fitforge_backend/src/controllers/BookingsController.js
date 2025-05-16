@@ -336,6 +336,108 @@ exports.deleteBooking = async (req, res) => {
   }
 };
 
+// Get Booking Analytics for Admin Dashboard
+exports.getBookingStats = async (req, res) => {
+  try {
+    // Get total number of bookings
+    const totalBookings = await getBookingCount();
+    
+    // Get pending bookings
+    const pendingBookings = await getBookingCountByStatus('pending');
+    
+    // Get completed bookings
+    const completedBookings = await getBookingCountByStatus('completed');
+    
+    // Get booking trends for last 6 months
+    const bookingTrend = await getBookingTrend();
+    
+    return res.status(200).json({
+      success: true,
+      message: "Booking statistics retrieved successfully",
+      data: {
+        totalBookings,
+        pendingBookings,
+        completedBookings,
+        bookingTrend
+      }
+    });
+  } catch (error) {
+    console.error("Error retrieving booking stats:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to retrieve booking statistics",
+      error: error.message
+    });
+  }
+};
+
+// Helper function to count bookings
+const getBookingCount = async () => {
+  try {
+    const count = await Bookings.count();
+    return count;
+  } catch (error) {
+    console.error("Error counting bookings:", error);
+    return 0;
+  }
+};
+
+// Helper function to count bookings by status
+const getBookingCountByStatus = async (status) => {
+  try {
+    const count = await Bookings.count({
+      where: { status }
+    });
+    return count;
+  } catch (error) {
+    console.error(`Error counting ${status} bookings:`, error);
+    return 0;
+  }
+};
+
+// Helper function to get booking trend
+const getBookingTrend = async () => {
+  try {
+    const { Sequelize } = require('../models/database');
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+    
+    // Simplified approach using JS date processing
+    const bookings = await Bookings.findAll({
+      where: {
+        created_at: {
+          [Sequelize.Op.gte]: sixMonthsAgo
+        }
+      },
+      attributes: ['created_at'],
+      order: [['created_at', 'ASC']]
+    });
+    
+    // Process bookings into monthly buckets
+    const monthlyData = {};
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    
+    bookings.forEach(booking => {
+      const date = new Date(booking.created_at);
+      const monthName = months[date.getMonth()];
+      if (!monthlyData[monthName]) {
+        monthlyData[monthName] = 0;
+      }
+      monthlyData[monthName]++;
+    });
+    
+    // Convert to array format
+    const trend = Object.keys(monthlyData).map(month => ({
+      date: month,
+      count: monthlyData[month]
+    }));
+    
+    return trend;
+  } catch (error) {
+    console.error("Error getting booking trend:", error);
+    return [];
+  }
+};
 // Debug endpoint to directly check bookings in database
 exports.debugTrainerBookings = async (req, res) => {
   try {
@@ -434,4 +536,4 @@ exports.debugTrainerBookings = async (req, res) => {
       success: false,
     });
   }
-};
+}
