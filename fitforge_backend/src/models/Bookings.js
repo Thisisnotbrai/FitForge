@@ -24,6 +24,18 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.DATE,
         allowNull: false,
         comment: "Full date and time for the end of the booking",
+        get() {
+          // This ensures we always get the raw value, not a modified one
+          const rawValue = this.getDataValue("end_date");
+          return rawValue;
+        },
+        set(value) {
+          // This ensures we're setting the raw value correctly
+          if (!value) {
+            throw new Error("end_date cannot be null or undefined");
+          }
+          this.setDataValue("end_date", value);
+        },
       },
       status: {
         type: DataTypes.ENUM("pending", "confirmed", "cancelled", "completed"),

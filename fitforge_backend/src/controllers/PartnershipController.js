@@ -146,9 +146,12 @@ exports.updatePartnershipStatus = async (req, res) => {
       partnership.end_date = end_date || new Date();
     }
 
-    // If reactivating, clear end_date
-    if (status === "active" && partnership.end_date) {
-      partnership.end_date = null;
+    // If reactivating, use provided end_date or keep existing
+    if (status === "active") {
+      if (end_date) {
+        partnership.end_date = end_date;
+      }
+      // No longer setting end_date to null when reactivating
     }
 
     if (notes) partnership.notes = notes;
@@ -196,6 +199,14 @@ exports.checkAndCreatePartnershipFromBooking = async (bookingId) => {
 
     const { trainee_id, trainer_id } = booking;
 
+    // Debug log the booking data
+    console.log(`Creating partnership from booking #${bookingId}:`, {
+      booking_data: booking.toJSON(),
+      end_date: booking.end_date,
+      end_date_type: typeof booking.end_date,
+      end_date_null: booking.end_date === null,
+    });
+
     // Check if partnership already exists
     let partnership = await Partnership.findOne({
       where: { trainee_id, trainer_id },
@@ -203,19 +214,27 @@ exports.checkAndCreatePartnershipFromBooking = async (bookingId) => {
 
     // If it exists, just return it
     if (partnership) {
+      console.log(
+        `Existing partnership found for booking #${bookingId}:`,
+        partnership.toJSON()
+      );
       return partnership;
     }
 
-    // Create new partnership using the booking's start_date
+    // Create new partnership using the booking's start_date and end_date
     partnership = await Partnership.create({
       trainee_id,
       trainer_id,
       start_date: booking.start_date,
-      end_date: null,
+      end_date: booking.end_date, // Use end_date from the booking instead of null
       notes: `Partnership created from confirmed booking #${bookingId}`,
       status: "active",
     });
 
+    console.log(
+      `Created new partnership from booking #${bookingId}:`,
+      partnership.toJSON()
+    );
     return partnership;
   } catch (error) {
     console.error("Error auto-creating partnership:", error);
@@ -232,6 +251,16 @@ exports.managePartnershipFromBookingStatus = async (bookingId, newStatus) => {
       return null;
     }
 
+    // Debug booking data
+    console.log(`Managing partnership for booking #${bookingId}:`, {
+      booking_data: booking.toJSON(),
+      new_status: newStatus,
+      end_date: booking.end_date,
+      end_date_type: typeof booking.end_date,
+      end_date_null: booking.end_date === null,
+      end_date_undefined: booking.end_date === undefined,
+    });
+
     const { trainee_id, trainer_id } = booking;
 
     // Find any existing partnership between this trainer and trainee
@@ -239,30 +268,51 @@ exports.managePartnershipFromBookingStatus = async (bookingId, newStatus) => {
       where: { trainee_id, trainer_id },
     });
 
+    if (partnership) {
+      console.log("Existing partnership found:", partnership.toJSON());
+    } else {
+      console.log("No existing partnership found");
+    }
+
     switch (newStatus) {
       case "confirmed":
         // If partnership doesn't exist, create a new one
         if (!partnership) {
+          // Debug log the start_date value
+          console.log("Creating new partnership with:", {
+            start_date: booking.start_date,
+            end_date: booking.end_date,
+            booking_end_date: booking.end_date,
+          });
+
           partnership = await Partnership.create({
             trainee_id,
             trainer_id,
             start_date: booking.start_date,
-            end_date: null,
+            end_date: booking.end_date, // Use end_date from the booking
             notes: `Partnership created from confirmed booking #${bookingId}`,
             status: "active",
           });
           console.log(
-            `Created new partnership #${partnership.id} from booking #${bookingId}`
+            `Created new partnership #${partnership.id} from booking #${bookingId}:`,
+            partnership.toJSON()
           );
         } else if (partnership.status !== "active") {
           // If partnership exists but isn't active, reactivate it
+          console.log("Reactivating partnership with:", {
+            current_end_date: partnership.end_date,
+            new_end_date: booking.end_date,
+            booking_end_date: booking.end_date,
+          });
+
           partnership.status = "active";
-          partnership.end_date = null; // Clear end date when reactivating
+          partnership.end_date = booking.end_date; // Use end_date from the booking
           partnership.notes =
             partnership.notes + `\nReactivated from booking #${bookingId}`;
           await partnership.save();
           console.log(
-            `Reactivated partnership #${partnership.id} from booking #${bookingId}`
+            `Reactivated partnership #${partnership.id} from booking #${bookingId}:`,
+            partnership.toJSON()
           );
         }
         break;

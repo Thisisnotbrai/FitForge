@@ -143,6 +143,15 @@ const BookingModal = ({ trainer, traineeId, onClose }) => {
       const startDateTime = new Date(`${startDate}T${startTime}`);
       const endDateTime = new Date(`${endDate}T${endTime}`);
 
+      // Validate datetime objects
+      if (isNaN(startDateTime.getTime())) {
+        throw new Error("Invalid start date/time format");
+      }
+
+      if (isNaN(endDateTime.getTime())) {
+        throw new Error("Invalid end date/time format");
+      }
+
       // Make sure end is after start
       if (endDateTime <= startDateTime) {
         throw new Error("End date/time must be after start date/time");
@@ -157,7 +166,15 @@ const BookingModal = ({ trainer, traineeId, onClose }) => {
         bookingDate,
         startDateTime: startDateTime.toString(),
         endDateTime: endDateTime.toString(),
+        startDateTimeISO: startDateTime.toISOString(),
+        endDateTimeISO: endDateTime.toISOString(),
       });
+
+      // Ensure end_date is properly formatted
+      const endDateISO = endDateTime.toISOString();
+      if (!endDateISO) {
+        throw new Error("Failed to format end date properly");
+      }
 
       // Data being sent to the backend
       const bookingData = {
@@ -165,24 +182,53 @@ const BookingModal = ({ trainer, traineeId, onClose }) => {
         trainer_id: trainer.id,
         date: bookingDate, // Using start date for the booking date
         start_date: startDateTime.toISOString(), // Full ISO string with date and time
-        end_date: endDateTime.toISOString(), // Full ISO string with date and time
+        end_date: endDateISO, // Full ISO string with date and time
         notes,
       };
 
+      // Final validation check
+      if (!bookingData.end_date) {
+        throw new Error(
+          "End date is missing. Please select a valid end date and time."
+        );
+      }
+
       console.log("Sending booking data to backend:", bookingData);
 
-      // Match the endpoint in app.js and BookingsRoutes.js
-      const response = await axios.post(
-        "http://localhost:3000/booking/createbook",
-        bookingData
-      );
+      try {
+        // Match the endpoint in app.js and BookingsRoutes.js
+        const response = await axios.post(
+          "http://localhost:3000/booking/createbook",
+          bookingData
+        );
 
-      console.log("Booking response:", response.data);
+        console.log("Booking response:", response.data);
 
-      setSuccess(true);
-      setTimeout(() => {
-        onClose();
-      }, 2000);
+        // Check if end_date was properly saved
+        if (!response.data.end_date) {
+          console.error("WARNING: end_date is missing in the response!");
+        } else {
+          console.log("end_date successfully saved:", response.data.end_date);
+        }
+
+        setSuccess(true);
+        setTimeout(() => {
+          onClose();
+        }, 2000);
+      } catch (err) {
+        console.error("Booking error:", err);
+        if (err.response) {
+          console.error("Error response:", {
+            status: err.response.status,
+            data: err.response.data,
+          });
+        }
+        setError(
+          err.response?.data?.message ||
+            err.message ||
+            "Failed to create booking"
+        );
+      }
     } catch (err) {
       console.error("Booking error:", err);
       if (err.response) {

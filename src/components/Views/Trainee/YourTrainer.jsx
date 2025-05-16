@@ -1,22 +1,18 @@
 import { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faCalendarAlt,
-  faTrophy,
-  faQuoteLeft,
-  faCheckCircle,
-  faDumbbell,
-} from "@fortawesome/free-solid-svg-icons";
+import { faDumbbell, faClock } from "@fortawesome/free-solid-svg-icons";
 import axios from "axios";
 import "./YourTrainer.css";
+import { useNavigate } from "react-router-dom";
 
 const YourTrainer = () => {
   const [trainer, setTrainer] = useState(null);
   const [partnership, setPartnership] = useState(null);
-  const [bookings, setBookings] = useState([]);
-  const [achievements, setAchievements] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [trainerWorkouts, setTrainerWorkouts] = useState([]);
+  const [loadingWorkouts, setLoadingWorkouts] = useState(false);
+  const navigate = useNavigate();
 
   // Fetch user data, partnership, and trainer data
   useEffect(() => {
@@ -63,48 +59,6 @@ const YourTrainer = () => {
           // If we have an active partnership, get trainer info from the partnership
           const trainerInfo = activePartnership.trainer;
 
-          // Fetch upcoming bookings with this trainer
-          const bookingsResponse = await axios.get(
-            `http://localhost:3000/booking/trainee/${user.id}`,
-            {
-              headers: { Authorization: `Bearer ${token}` },
-            }
-          );
-
-          // Filter to only include bookings with this trainer and with future dates
-          const today = new Date();
-          today.setHours(0, 0, 0, 0);
-
-          const upcomingBookings = bookingsResponse.data.filter((booking) => {
-            const bookingDate = new Date(booking.date);
-            bookingDate.setHours(0, 0, 0, 0);
-            return (
-              booking.trainer_id === trainerInfo.id &&
-              bookingDate >= today &&
-              (booking.status === "confirmed" || booking.status === "pending")
-            );
-          });
-
-          setBookings(upcomingBookings);
-
-          // Set mock achievements for now (this would come from a real endpoint in production)
-          setAchievements([
-            {
-              id: 1,
-              title: "Completed 4 weeks of strength training",
-              date: new Date(
-                today.getTime() - 15 * 24 * 60 * 60 * 1000
-              ).toISOString(),
-            },
-            {
-              id: 2,
-              title: "Reached target weight goal",
-              date: new Date(
-                today.getTime() - 30 * 24 * 60 * 60 * 1000
-              ).toISOString(),
-            },
-          ]);
-
           // Convert trainer data to match the format your component expects
           setTrainer({
             id: trainerInfo.id,
@@ -115,14 +69,10 @@ const YourTrainer = () => {
             specialties: trainerInfo.trainerInfo
               ? [trainerInfo.trainerInfo.specialization]
               : ["Strength Training", "Cardio", "Nutrition"],
-            testimonials: [
-              {
-                id: 1,
-                text: "An excellent trainer who really understands how to motivate clients and design effective workout plans.",
-                author: "Michael P.",
-              },
-            ],
           });
+
+          // Fetch workouts created by the trainer for this trainee
+          fetchTrainerWorkouts(user.id);
         }
       } catch (err) {
         console.error("Error fetching trainer data:", err);
@@ -136,6 +86,42 @@ const YourTrainer = () => {
 
     fetchTrainerData();
   }, []);
+
+  // Fetch workouts created by the trainer for this trainee
+  const fetchTrainerWorkouts = async (traineeId) => {
+    try {
+      setLoadingWorkouts(true);
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        throw new Error("Not authenticated");
+      }
+
+      // Fetch trainee workouts
+      const response = await axios.get(
+        `http://localhost:3000/trainee/my-workouts`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "X-Trainee-Id": traineeId, // Use traineeId to fetch specific trainee's workouts
+          },
+        }
+      );
+
+      if (response.data && response.data.success) {
+        // Filter to only show workouts created by the trainer
+        const trainerCreated = response.data.data.filter(
+          (workout) => workout.created_by_trainer
+        );
+        setTrainerWorkouts(trainerCreated);
+      }
+    } catch (err) {
+      console.error("Error fetching trainer workouts:", err);
+      // Don't show error to user, just log it
+    } finally {
+      setLoadingWorkouts(false);
+    }
+  };
 
   // Handle partnership status change
   const handlePartnershipStatusChange = async (newStatus) => {
@@ -186,26 +172,9 @@ const YourTrainer = () => {
     }
   };
 
-  // Format session date and time from start_date and end_date
-  const formatSessionDate = (dateString, startDateString, endDateString) => {
-    const date = new Date(dateString);
-    const startDate = new Date(startDateString);
-    const endDate = new Date(endDateString);
-
-    return {
-      day: date.toLocaleDateString("en-US", {
-        weekday: "short",
-        month: "short",
-        day: "numeric",
-      }),
-      time: `${startDate.toLocaleTimeString("en-US", {
-        hour: "2-digit",
-        minute: "2-digit",
-      })} - ${endDate.toLocaleTimeString("en-US", {
-        hour: "2-digit",
-        minute: "2-digit",
-      })}`,
-    };
+  // Navigate to workout detail page
+  const handleStartWorkout = (workoutId) => {
+    navigate(`/workout/${workoutId}`);
   };
 
   if (loading) {
@@ -275,109 +244,75 @@ const YourTrainer = () => {
           <div className="trainer-sections">
             <div className="trainer-section">
               <h3 className="section-title">
-                <FontAwesomeIcon icon={faCalendarAlt} /> Upcoming Sessions
+                <FontAwesomeIcon icon={faClock} /> Partnership Details
               </h3>
 
-              {bookings && bookings.length > 0 ? (
-                bookings.map((session) => {
-                  const { day, time } = formatSessionDate(
-                    session.date,
-                    session.start_date,
-                    session.end_date
-                  );
-                  return (
-                    <div key={session.id} className="upcoming-session">
-                      <div>
-                        <div className="session-time">
-                          {day} at {time}
-                        </div>
-                        <div className="session-detail">
-                          {session.type || "Training Session"} (
-                          {Math.round(
-                            (new Date(session.end_date) -
-                              new Date(session.start_date)) /
-                              60000
-                          )}{" "}
-                          min)
-                        </div>
-                      </div>
-                      <button className="session-action">Join</button>
+              {partnership && partnership.start_date ? (
+                <div className="partnership-details">
+                  <div className="partnership-date">
+                    <span className="date-label">Start Date:</span>
+                    <span className="date-value">
+                      {new Date(partnership.start_date).toLocaleDateString()}
+                    </span>
+                  </div>
+                  {partnership.end_date && (
+                    <div className="partnership-date">
+                      <span className="date-label">End Date:</span>
+                      <span className="date-value">
+                        {new Date(partnership.end_date).toLocaleDateString()}
+                      </span>
                     </div>
-                  );
-                })
+                  )}
+                </div>
               ) : (
-                <p>
-                  No upcoming sessions scheduled. Contact your trainer to set up
-                  your next workout.
-                </p>
+                <p>Partnership information not available.</p>
               )}
 
               <div className="trainer-section">
                 <h3 className="section-title">
-                  <FontAwesomeIcon icon={faDumbbell} /> Recommended Workouts
+                  <FontAwesomeIcon icon={faDumbbell} /> Trainer Assigned
+                  Workouts
                 </h3>
-                <div className="upcoming-session">
-                  <div>
-                    <div className="session-time">Full Body Strength</div>
-                    <div className="session-detail">45 min • Intermediate</div>
+
+                {loadingWorkouts ? (
+                  <div className="loading-spinner">Loading workouts...</div>
+                ) : trainerWorkouts.length > 0 ? (
+                  <div className="trainer-workouts-grid">
+                    {trainerWorkouts.map((workout) => (
+                      <div key={workout.id} className="trainer-workout">
+                        <div className="workout-name">
+                          {workout.workout_name}
+                        </div>
+                        <div className="workout-detail">
+                          <span className="workout-type">
+                            {workout.workout_type}
+                          </span>
+                          <span className="workout-level">
+                            {workout.workout_level}
+                          </span>
+                          <span className="workout-duration">
+                            {workout.workout_duration} min
+                          </span>
+                        </div>
+                        <div className="workout-detail">
+                          Created on{" "}
+                          {new Date(workout.createdAt).toLocaleDateString()}
+                        </div>
+                        <button
+                          className="session-action"
+                          onClick={() => handleStartWorkout(workout.id)}
+                        >
+                          Start Workout
+                        </button>
+                      </div>
+                    ))}
                   </div>
-                  <button className="session-action">Start</button>
-                </div>
-                <div className="upcoming-session">
-                  <div>
-                    <div className="session-time">HIIT Cardio Blast</div>
-                    <div className="session-detail">
-                      30 min • Beginner-Friendly
-                    </div>
+                ) : (
+                  <div className="no-workouts-message">
+                    <p>Your trainer hasn&apos;t assigned any workouts yet.</p>
                   </div>
-                  <button className="session-action">Start</button>
-                </div>
+                )}
               </div>
-            </div>
-
-            <div className="trainer-section">
-              <h3 className="section-title">
-                <FontAwesomeIcon icon={faTrophy} /> Your Achievements
-              </h3>
-
-              {achievements && achievements.length > 0 ? (
-                achievements.map((achievement) => (
-                  <div key={achievement.id} className="achievement">
-                    <div className="achievement-icon">
-                      <FontAwesomeIcon icon={faCheckCircle} />
-                    </div>
-                    <div>
-                      <div className="achievement-text">
-                        {achievement.title}
-                      </div>
-                      <div className="achievement-date">
-                        {new Date(achievement.date).toLocaleDateString()}
-                      </div>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <p>
-                  No achievements recorded yet. Keep working with your trainer!
-                </p>
-              )}
-
-              <h3 className="section-title" style={{ marginTop: "30px" }}>
-                <FontAwesomeIcon icon={faQuoteLeft} /> Client Testimonials
-              </h3>
-
-              {trainer.testimonials && trainer.testimonials.length > 0 ? (
-                trainer.testimonials.map((testimonial) => (
-                  <div key={testimonial.id} className="testimonial">
-                    <p className="testimonial-text">
-                      &quot;{testimonial.text}&quot;
-                    </p>
-                    <p className="testimonial-author">— {testimonial.author}</p>
-                  </div>
-                ))
-              ) : (
-                <p>No testimonials available yet.</p>
-              )}
             </div>
           </div>
         </>

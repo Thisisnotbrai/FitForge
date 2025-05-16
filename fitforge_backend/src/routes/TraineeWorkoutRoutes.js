@@ -45,4 +45,11 @@ router.get(
   TraineeWorkoutController.getPublicWorkouts
 );
 
+// Create a workout for a trainee (trainer only)
+router.post(
+  "/trainee/create-workout-for-trainee",
+  authenticateToken,
+  TraineeWorkoutController.createWorkoutForTrainee
+);
+
 module.exports = router;

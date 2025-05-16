@@ -8,6 +8,61 @@ exports.createBooking = async (req, res) => {
     const { trainee_id, trainer_id, date, start_date, end_date, notes } =
       req.body;
 
+    // Debug logging to check if end_date is being received
+    console.log("Booking request received:", {
+      trainee_id,
+      trainer_id,
+      date,
+      start_date,
+      end_date,
+      notes,
+      end_date_type: typeof end_date,
+      end_date_null: end_date === null,
+      end_date_undefined: end_date === undefined,
+      end_date_empty: end_date === "",
+    });
+
+    // Validate required fields
+    if (!trainee_id || !trainer_id || !date || !start_date || !end_date) {
+      return res.status(400).json({
+        message: "Missing required fields",
+        required: [
+          "trainee_id",
+          "trainer_id",
+          "date",
+          "start_date",
+          "end_date",
+        ],
+        received: { trainee_id, trainer_id, date, start_date, end_date },
+      });
+    }
+
+    // Specific validation for end_date
+    if (end_date === null || end_date === undefined || end_date === "") {
+      return res.status(400).json({
+        message: "end_date cannot be null, undefined, or empty",
+        received_end_date: end_date,
+        end_date_type: typeof end_date,
+      });
+    }
+
+    // Try to parse end_date to ensure it's a valid date
+    try {
+      const endDateObj = new Date(end_date);
+      if (isNaN(endDateObj.getTime())) {
+        return res.status(400).json({
+          message: "end_date is not a valid date",
+          received_end_date: end_date,
+        });
+      }
+    } catch (error) {
+      return res.status(400).json({
+        message: "Failed to parse end_date",
+        received_end_date: end_date,
+        error: error.message,
+      });
+    }
+
     // Validate that both users exist
     const trainee = await User.findOne({
       where: { id: trainee_id, user_role: "trainee" },
@@ -129,7 +184,7 @@ exports.createBooking = async (req, res) => {
     }
 
     // Create the booking
-    const booking = await Bookings.create({
+    const bookingData = {
       trainee_id,
       trainer_id,
       date,
@@ -137,7 +192,15 @@ exports.createBooking = async (req, res) => {
       end_date,
       notes,
       status: "pending",
-    });
+    };
+
+    console.log("Creating booking with data:", bookingData);
+
+    const booking = await Bookings.create(bookingData);
+
+    // Debug logging to check created booking
+    console.log("Booking created:", booking.toJSON());
+    console.log("end_date in created booking:", booking.end_date);
 
     return res.status(201).json(booking);
   } catch (error) {

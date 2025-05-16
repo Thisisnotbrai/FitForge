@@ -1,5 +1,5 @@
 /* eslint-disable no-undef */
-const { Exercise } = require("../models/database");
+const { Exercise, sequelize } = require("../models/database");
 const send = require("../utils/response");
 const multer = require("multer");
 const path = require("path");
@@ -89,6 +89,7 @@ exports.createExercise = async (req, res) => {
       rest_time,
       rest_between,
       workout_id,
+      trainee_id,
     } = req.body;
 
     // Validate required fields
@@ -97,6 +98,26 @@ exports.createExercise = async (req, res) => {
         success: false,
         message: "Exercise name and workout ID are required",
       });
+    }
+
+    // If trainee_id is provided, verify partnership (for trainers adding exercises to trainee workouts)
+    if (trainee_id && req.user.role === "trainer") {
+      // Check if the trainer has an active partnership with this trainee
+      const partnership = await sequelize.models.Partnership.findOne({
+        where: {
+          trainee_id: trainee_id,
+          trainer_id: req.user.id,
+          status: "active",
+        },
+      });
+
+      if (!partnership) {
+        return res.status(403).json({
+          success: false,
+          message:
+            "You must have an active partnership with this trainee to add exercises for them",
+        });
+      }
     }
 
     // Get the highest exercise_order for this workout
@@ -124,7 +145,11 @@ exports.createExercise = async (req, res) => {
       exercise_order,
     });
 
-    res.status(201).json(newExercise);
+    res.status(201).json({
+      success: true,
+      message: "Exercise created successfully",
+      data: newExercise,
+    });
   } catch (error) {
     console.error("Error creating exercise:", error);
     res.status(500).json({

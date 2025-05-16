@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faCamera,
@@ -8,8 +8,6 @@ import {
   faUser,
   faCertificate,
   faDumbbell,
-  faMoneyBillWave,
-  faCalendarAlt,
   faToggleOn,
   faToggleOff,
   faSpinner,

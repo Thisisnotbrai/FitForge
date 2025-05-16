@@ -2,6 +2,13 @@
 const dbconfig = require("../config/config");
 const { Sequelize, DataTypes } = require("sequelize");
 
+// Log database configuration (without sensitive info)
+console.log("Database configuration:", {
+  database: dbconfig.database,
+  host: dbconfig.host,
+  dialect: dbconfig.dialect,
+});
+
 const sequelize = new Sequelize(
   dbconfig.database,
   dbconfig.user,
@@ -9,6 +16,7 @@ const sequelize = new Sequelize(
   {
     host: dbconfig.host,
     dialect: dbconfig.dialect,
+    logging: console.log, // Enable SQL query logging
   }
 );
 
@@ -30,6 +38,15 @@ db.WorkoutHistory = require("../models/WorkoutHistory")(sequelize, DataTypes);
 db.Bookings = require("../models/Bookings")(sequelize, DataTypes);
 db.TraineeWorkout = require("../models/TraineeWorkout")(sequelize, DataTypes);
 db.Partnership = require("../models/Partnership")(sequelize, DataTypes);
+
+// Log model definitions
+console.log("Bookings model definition:", {
+  end_date: db.Bookings.rawAttributes.end_date,
+});
+
+console.log("Partnership model definition:", {
+  end_date: db.Partnership.rawAttributes.end_date,
+});
 
 // Set up associations
 Object.keys(db).forEach((modelName) => {

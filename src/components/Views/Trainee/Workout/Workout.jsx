@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
-import "../Workout/Workout.css";
+import "./Workout.css";
 
 const Workout = () => {
   const [workouts, setWorkouts] = useState([]);
@@ -20,9 +20,11 @@ const Workout = () => {
   });
   const [formError, setFormError] = useState("");
   const [formSuccess, setFormSuccess] = useState("");
+  const navigate = useNavigate();
 
   const premadeWorkouts = [
     {
+      id: "premade-1",
       title: "Mobility Flow",
       duration: "30 min",
       calories: 345,
@@ -32,6 +34,7 @@ const Workout = () => {
         "https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=800&q=80",
     },
     {
+      id: "premade-2",
       title: "Strength",
       duration: "30 min",
       calories: 345,
@@ -41,6 +44,7 @@ const Workout = () => {
         "https://images.unsplash.com/photo-1517960413843-0aee8e2d471c?auto=format&fit=crop&w=800&q=80",
     },
     {
+      id: "premade-3",
       title: "Full Body",
       duration: "42 min",
       calories: 289,
@@ -50,6 +54,7 @@ const Workout = () => {
         "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80",
     },
     {
+      id: "premade-4",
       title: "Power Sculpt",
       duration: "30 min",
       calories: 345,
@@ -59,6 +64,7 @@ const Workout = () => {
         "https://images.unsplash.com/photo-1519864600265-abb23847ef2c?auto=format&fit=crop&w=800&q=80",
     },
     {
+      id: "premade-5",
       title: "HIIT Burn",
       duration: "56 min",
       calories: 427,
@@ -77,28 +83,8 @@ const Workout = () => {
         const token = localStorage.getItem("token");
 
         // Initialize arrays to hold different workout types
-        let featuredWorkouts = [];
         let userWorkouts = [];
         let publicWorkouts = [];
-
-        // Fetch regular workouts
-        try {
-          const regularResponse = await axios.get(
-            "http://localhost:3000/workouts/workouts"
-          );
-
-          if (regularResponse.data && Array.isArray(regularResponse.data)) {
-            featuredWorkouts = [...regularResponse.data];
-          } else {
-            console.warn(
-              "Unexpected format for regular workouts:",
-              regularResponse.data
-            );
-          }
-        } catch (err) {
-          console.error("Error fetching regular workouts:", err);
-          // Continue with empty array if regular workouts fail
-        }
 
         // If user is logged in, also fetch their personal workouts
         if (token) {
@@ -165,16 +151,11 @@ const Workout = () => {
           // Continue with available workouts if public workouts fail
         }
 
-        // Combine all workouts for category filtering, but keep them separate for display
-        const allWorkouts = [
-          ...featuredWorkouts,
-          ...userWorkouts,
-          ...publicWorkouts,
-        ];
+        // Combine all workouts for category filtering
+        const allWorkouts = [...userWorkouts, ...publicWorkouts];
         console.log("All workouts loaded:", allWorkouts);
         setWorkouts({
           all: allWorkouts,
-          featured: featuredWorkouts,
           user: userWorkouts,
           public: publicWorkouts,
         });
@@ -428,6 +409,13 @@ const Workout = () => {
     setFormSuccess("");
   };
 
+  const handleStartPremadeWorkout = (workout) => {
+    console.log("Starting premade workout:", workout);
+    // If it's a premade workout, we can navigate to a generic workout detail page
+    // You might want to create these workouts in the backend or handle them differently
+    navigate(`/workout/${workout.id}`);
+  };
+
   if (loading)
     return <div className="loading-container">Loading workouts...</div>;
 
@@ -578,23 +566,16 @@ const Workout = () => {
                   <span>🔥 {workout.calories} Kcal</span>
                   <span>⏱ {workout.duration}</span>
                 </div>
-                <button className="btn-premade-start">Start Workout</button>
+                <button
+                  className="btn-premade-start"
+                  onClick={() => handleStartPremadeWorkout(workout)}
+                >
+                  Start Workout
+                </button>
               </div>
             </div>
           ))}
         </div>
-
-        {/* Featured Workouts Section */}
-        <section className="featured-workouts">
-          <div className="section-header">
-            <h2>Featured Workouts</h2>
-            <Link to="/workouts" className="view-all-link">
-              View All
-            </Link>
-          </div>
-
-          {renderWorkoutCards(workouts.featured)}
-        </section>
 
         {/* My Workouts Section - Only shown if user has created workouts */}
         {workouts.user && workouts.user.length > 0 && (
@@ -604,6 +585,20 @@ const Workout = () => {
             </div>
 
             {renderWorkoutCards(workouts.user, true)}
+          </section>
+        )}
+
+        {/* Public Workouts Section - Only shown if public workouts exist */}
+        {workouts.public && workouts.public.length > 0 && (
+          <section className="public-workouts">
+            <div className="section-header">
+              <h2>Community Workouts</h2>
+              <p className="section-description">
+                Workouts shared by other users in the community
+              </p>
+            </div>
+
+            {renderWorkoutCards(workouts.public, false)}
           </section>
         )}
 

@@ -1,14 +1,14 @@
 :root {
-  --primary-color: #1B202B;
-  --primary-dark: #23293A;
+  --primary-color: #1b202b;
+  --primary-dark: #23293a;
   --success-color: #27ae60;
   --danger-color: #e74c3c;
-  --accent-color: #C97B63;
+  --accent-color: #c97b63;
   --text-primary: #fff;
   --text-secondary: #b0b8c1;
-  --bg-light: #23293A;
-  --bg-card: #23293A;
-  --border-color: #C97B63;
+  --bg-light: #23293a;
+  --bg-card: #23293a;
+  --border-color: #c97b63;
   --shadow-sm: 0 2px 8px rgba(25, 32, 43, 0.12);
   --shadow-md: 0 5px 15px rgba(25, 32, 43, 0.18);
   --shadow-lg: 0 8px 25px rgba(25, 32, 43, 0.22);
@@ -25,14 +25,147 @@
 }
 
 /* Main container styles */
-.workout-container,
-.workout-list,
-.workout-detail,
-.active-workout-container {
-  max-width: 1200px;
+.workout-container {
+  width: 100%;
+  max-width: 1400px; /* Increased from likely 1200px */
   margin: 0 auto;
   padding: 2rem;
-  background-color: #f8f9fa;
+  background-color: var(--primary-color);
+  color: var(--text-primary);
+  min-height: 100vh;
+}
+
+/* Workout dashboard - the main content area */
+.workout-dashboard {
+  width: 100%;
+  background-color: var(--primary-dark);
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+  box-shadow: var(--shadow-lg);
+}
+
+/* Hero section styles */
+.workout-hero {
+  width: 100%;
+  padding: 3rem 2rem; /* Increased padding */
+  margin-bottom: 2.5rem;
+  background: linear-gradient(
+      120deg,
+      rgba(35, 41, 58, 0.9),
+      rgba(27, 32, 43, 0.8)
+    ),
+    url("https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=1920&q=80");
+  background-size: cover;
+  background-position: center;
+  border-radius: var(--radius-lg);
+  text-align: center;
+}
+
+.hero-content {
+  max-width: 800px; /* Increased from likely 600px */
+  margin: 0 auto;
+}
+
+/* Categories styles */
+.workout-categories {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 2.5rem;
+  justify-content: center;
+}
+
+/* Premade workouts grid */
+.premade-workouts-grid {
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fill,
+    minmax(280px, 1fr)
+  ); /* Adjusted for better fit */
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+}
+
+.premade-workout-card {
+  height: 220px;
+  border-radius: var(--radius-md);
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Workout grid for custom workouts */
+.workout-grid {
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fill,
+    minmax(300px, 1fr)
+  ); /* Increased card size */
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+}
+
+/* Add workout section */
+.add-workout-section {
+  margin-bottom: 3rem;
+}
+
+.add-workout-form-container {
+  background-color: var(--bg-card);
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+  margin-top: 1.5rem;
+  box-shadow: var(--shadow-md);
+  max-width: 900px; /* Increased from likely 800px */
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Form layout improvements */
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+  .premade-workouts-grid {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .workout-container {
+    padding: 1rem;
+  }
+
+  .workout-dashboard {
+    padding: 1.5rem;
+  }
+
+  .workout-hero {
+    padding: 2rem 1rem;
+  }
+
+  .workout-grid,
+  .premade-workouts-grid {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .workout-grid,
+  .premade-workouts-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* Shared heading styles */
@@ -739,46 +872,46 @@ h4 {
   .workout-header-content {
     padding: 1.5rem;
   }
-  
+
   .workout-specs {
     flex-direction: column;
     gap: 0.75rem;
     margin: 1rem 0;
   }
-  
+
   .workout-actions-container {
     flex-direction: column;
   }
-  
+
   .exercise-details {
     flex-direction: column;
     gap: 0.5rem;
   }
-  
+
   .exercise-item {
     flex-wrap: wrap;
   }
-  
+
   .exercise-number {
     margin-bottom: 0.5rem;
   }
-  
+
   .exercise-actions {
     margin-top: 1rem;
     width: 100%;
     justify-content: flex-end;
   }
-  
+
   .exercises-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 1rem;
   }
-  
+
   .exercises-subtitle {
     max-width: 100%;
   }
-  
+
   .btn-add-exercise-header {
     width: 100%;
   }
@@ -1623,35 +1756,44 @@ h4 {
   box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
 }
 
-/* Section Header */
+/* Section headers */
 .section-header {
+  margin-bottom: 2rem;
+  position: relative;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1.5rem;
-  padding-bottom: 0.8rem;
-  border-bottom: 1px solid #eaeaea;
+  flex-direction: column;
 }
 
 .section-header h2 {
   font-size: 1.8rem;
-  font-weight: 600;
-  color: #2c3e50;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 0.5rem 0;
+  letter-spacing: -0.025em;
+}
+
+.section-description {
+  color: var(--text-secondary);
+  font-size: 1rem;
   margin: 0;
 }
 
-.view-all-link {
-  color: #3498db;
-  font-weight: 500;
-  text-decoration: none;
-  display: flex;
-  align-items: center;
-  transition: all 0.2s ease;
+/* My Workouts Section */
+.my-workouts {
+  margin-bottom: 3rem;
 }
 
-.view-all-link:hover {
-  color: #2980b9;
-  text-decoration: underline;
+/* Public Workouts Section */
+.public-workouts {
+  margin-bottom: 3rem;
+}
+
+/* Add Workout Section */
+.add-workout-section {
+  margin-bottom: 3rem;
+  background-color: rgba(0, 0, 0, 0.15);
+  border-radius: var(--radius-lg);
+  padding: 2rem;
 }
 
 /* Workout Grid */
@@ -2140,15 +2282,15 @@ h4 {
     grid-template-columns: 1fr;
     gap: 1rem;
   }
-  
+
   .add-workout-form-container {
     padding: 1.5rem;
   }
-  
+
   .form-actions {
     flex-direction: column;
   }
-  
+
   .btn-add-workout,
   .btn-cancel {
     width: 100%;
@@ -2310,7 +2452,7 @@ h4 {
 }
 
 .btn-add-exercise:before {
-  content: '+';
+  content: "+";
   font-size: 1.2rem;
   font-weight: 700;
   margin-right: 5px;
@@ -2428,15 +2570,6 @@ h4 {
   color: #27ae60;
 }
 
-/* Style for the featured workouts to differentiate them */
-.featured-workouts .workout-card {
-  border-left: 3px solid #3498db;
-}
-
-.featured-workouts .section-header {
-  border-color: #3498db;
-}
-
 /* Empty state for workout sections */
 .empty-section {
   background-color: #f8f9fa;
@@ -2489,8 +2622,14 @@ h4 {
 }
 
 @keyframes modal-slide-up {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .modal-header {
@@ -2606,8 +2745,14 @@ h4 {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Toggle Switch */
@@ -2888,20 +3033,20 @@ input:checked + .toggle-label:before {
     max-width: none;
     margin: 0 10px;
   }
-  
+
   .form-row {
     grid-template-columns: 1fr;
   }
-  
+
   .exercise-timer-toggle {
     flex-direction: column;
     gap: 12px;
   }
-  
+
   .toggle-switch {
     margin-right: auto;
   }
-  
+
   .modal-body {
     max-height: 60vh;
     padding: 20px;
@@ -2911,7 +3056,7 @@ input:checked + .toggle-label:before {
     flex-direction: column-reverse;
     gap: 10px;
   }
-  
+
   .modal-footer button {
     width: 100%;
   }
@@ -2945,7 +3090,11 @@ input:checked + .toggle-label:before {
   color: #fff;
   padding: 2rem 1.5rem 1.5rem 1.5rem;
   width: 100%;
-  background: linear-gradient(0deg, rgba(44,62,80,0.7) 40%, rgba(44,62,80,0.1) 100%);
+  background: linear-gradient(
+    0deg,
+    rgba(44, 62, 80, 0.7) 40%,
+    rgba(44, 62, 80, 0.1) 100%
+  );
   border-radius: 0 0 var(--radius-lg) var(--radius-lg);
 }
 
@@ -2960,14 +3109,18 @@ input:checked + .toggle-label:before {
   margin-bottom: 0.7em;
   letter-spacing: 0.5px;
 }
-.premade-badge.challenge { background: var(--success-color); }
-.premade-badge.workout { background: var(--primary-dark); }
+.premade-badge.challenge {
+  background: var(--success-color);
+}
+.premade-badge.workout {
+  background: var(--primary-dark);
+}
 
 .premade-card-content h3 {
   font-size: 2rem;
   font-weight: 700;
   margin: 0 0 0.7em 0;
-  text-shadow: 0 2px 8px rgba(0,0,0,0.18);
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
 }
 
 .premade-meta {
@@ -2988,7 +3141,7 @@ input:checked + .toggle-label:before {
   font-weight: 600;
   cursor: pointer;
   transition: background 0.2s;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 .btn-premade-start:hover {
   background: var(--primary-dark);
